@@ -172,6 +172,11 @@ Default admin credentials:
 | `POST` | `/api/focus/stop` | End focus session and persist time entry |
 | `GET` | `/api/search?q=` | Unified search across tasks, projects, goals, notes |
 | `POST` | `/api/templates/apply` | 1-click seeding (Software Engineer, Student, Peak Performance) |
+| `POST` | `/api/schedule/work` | Generate full 9-to-5 work schedule with engineering tasks |
+| `POST` | `/api/schedule/task` | Schedule individual task directly into calendar slot |
+| `GET` | `/api/users` | List all registered user accounts |
+| `POST` | `/api/users` | Add new user account with personal workspace |
+| `DELETE` | `/api/users/:id` | Remove user account |
 | `POST` | `/api/daily-review` | Submit evening reflection with AI feedback |
 | `GET` | `/api/export` | Download complete JSON snapshot of all SQLite tables |
 | `POST` | `/api/workspaces/clear`| Reset all workspace data to clean state |

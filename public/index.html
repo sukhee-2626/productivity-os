@@ -354,6 +354,7 @@
       <div class="nav-item" onclick="showView('journal')"><span class="icon">📓</span><span>Journal & Reviews</span></div>
       <div class="nav-item" onclick="showView('braindump')"><span class="icon">🧠</span><span>Brain Dump</span></div>
       <div class="nav-item" onclick="showView('ai')"><span class="icon">🤖</span><span>AI Assistant</span></div>
+      <div class="nav-item" onclick="openModal('user-manage')"><span class="icon">👥</span><span>Team & Users</span></div>
     </div>
 
     <div class="sidebar-footer">
@@ -391,9 +392,11 @@
         <div class="badge badge-streak">🔥 <span id="streak-count">0</span> Streak</div>
         <div class="badge badge-score">⚡ <span id="score-count">0</span>/100</div>
 
-        <div id="user-profile-badge" class="badge" style="background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.25); color:#60a5fa;">
+        <div id="user-profile-badge" class="badge" style="background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.25); color:#60a5fa; cursor:pointer;" onclick="openModal('user-manage')" title="Manage users">
           👤 <span id="current-user-name">admin</span>
         </div>
+        <button class="badge" style="cursor:pointer; color:#60a5fa;" onclick="openModal('user-add')">+ User</button>
+        <button class="badge" style="cursor:pointer; color:#f87171;" onclick="logout()">Logout</button>
 
         <button class="badge" style="cursor:pointer; color:#f87171;" onclick="clearAllData()">🗑 Reset</button>
         <button class="btn-action" onclick="openModal('task')">+ New Task</button>
@@ -565,7 +568,10 @@
             <h1 style="font-size: 1.6rem; font-weight: 800;">📅 Time-Block Grid Calendar</h1>
             <p style="color: var(--text-muted); font-size: 0.88rem;">Click any slot to schedule focus commitments directly in SQLite.</p>
           </div>
-          <button class="btn-action" onclick="openModal('event')">+ Add Event</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" style="color:#60a5fa;" onclick="loadWorkSchedule()">💼 Load 9-5 Work Schedule</button>
+            <button class="btn-action" onclick="openModal('event')">+ Add Event</button>
+          </div>
         </div>
         <div class="calendar-grid" id="interactive-calendar-grid">
           <!-- Populated by JS -->
@@ -1001,6 +1007,7 @@
               <span style="text-transform: capitalize;">${t.priority}</span>
             </div>
           </div>
+          <button class="btn-secondary" style="padding:3px 7px; font-size:0.74rem; color:#60a5fa; border-color:rgba(59,130,246,0.3);" onclick="event.stopPropagation(); scheduleTaskPrompt(${t.id}, '${t.title.replace(/'/g, "\\'")}', ${t.estimated_duration || 45})" title="Schedule into time block">📅 Block</button>
           <button class="btn-secondary" style="padding:3px 8px; font-size:0.75rem; color:#f87171; border-color:rgba(239,68,68,0.25);" onclick="event.stopPropagation(); deleteSingleTask(${t.id})" title="Delete task">🗑</button>
         </div>
       `;
@@ -1159,6 +1166,7 @@
               ${matches.map(m => `
                 <div class="time-block-pill" style="background:rgba(59,130,246,0.18); border-left:3px solid ${m.color}; color:#fff;">
                   <span>📌</span> <span>${m.title}</span>
+                  <span style="margin-left:6px; cursor:pointer; color:#f87171; font-size:0.75rem;" onclick="event.stopPropagation(); deleteCalendarEvent(${m.id})" title="Remove block">✕</span>
                 </div>
               `).join('')}
               ${matches.length === 0 ? '<span style="font-size:0.75rem; color:#475569;">+ Click to block time</span>' : ''}
@@ -1184,6 +1192,36 @@
           color: '#3b82f6'
         })
       }).then(() => loadCalendarGrid());
+    }
+
+    async function deleteCalendarEvent(id) {
+      if (!confirm('Remove this calendar block?')) return;
+      await apiFetch(`/api/calendar/${id}`, { method: 'DELETE' });
+      loadCalendarGrid();
+    }
+
+    async function scheduleTaskPrompt(taskId, title, duration) {
+      const time = prompt(`Schedule "${title}" for what time today? (HH:MM e.g. 09:30 or 14:00):`, '10:00');
+      if (!time) return;
+      await apiFetch('/api/schedule/task', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ task_id: taskId, start_time: time, duration_minutes: duration })
+      });
+      loadCalendarGrid();
+      loadOverview();
+      alert(`Scheduled "${title}" at ${time}!`);
+    }
+
+    async function loadWorkSchedule() {
+      if (!confirm('Populate today with a structured 9-to-5 Work Schedule (Standup, Deep Work, Code Review, Shutdown)?')) return;
+      await apiFetch('/api/schedule/work', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspace_id: 3 })
+      });
+      loadViewData(currentView);
+      alert('💼 9-to-5 Work Schedule and Engineering tasks generated!');
     }
 
     // 6. Goals
@@ -1728,6 +1766,40 @@
             <button class="btn-secondary" onclick="closeModal()">Cancel</button>
           </div>
         `;
+      } else if (type === 'user-add') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 14px;">👥 Add New User Account</h2>
+          <p style="color:var(--text-muted); font-size:0.84rem; margin-bottom:16px;">Create a new user with an isolated personal workspace.</p>
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="nu-username" class="input-field" placeholder="e.g. alex" autofocus>
+          </div>
+          <div class="form-group">
+            <label>Email (Optional)</label>
+            <input type="email" id="nu-email" class="input-field" placeholder="alex@company.com">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="nu-password" class="input-field" placeholder="Minimum 6 characters">
+          </div>
+          <div id="nu-error" style="display:none; color:#f87171; font-size:0.8rem; margin-bottom:10px;"></div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitCreateUser()">Create User</button>
+          </div>
+        `;
+      } else if (type === 'user-manage') {
+        body.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+            <h2>👥 Team & Users</h2>
+            <button class="btn-action" style="font-size:0.78rem;" onclick="closeModal(); openModal('user-add')">+ Add User</button>
+          </div>
+          <div id="users-table-container" style="max-height:300px; overflow-y:auto;">Loading team members...</div>
+          <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+            <button class="btn-secondary" onclick="closeModal()">Close</button>
+          </div>
+        `;
+        loadUsersTable();
       } else if (type === 'evening-review') {
         body.innerHTML = `
           <h2 style="margin-bottom: 12px;">🌙 Daily Evening Reflection</h2>
@@ -1804,6 +1876,59 @@
       else if (type === 'project' || type === 'goal') showView('goals');
       else if (type === 'habit') showView('habits');
       else if (type === 'note') showView('notes');
+    }
+
+    async function submitCreateUser() {
+      const username = document.getElementById('nu-username').value.trim();
+      const email = document.getElementById('nu-email').value.trim();
+      const password = document.getElementById('nu-password').value;
+      const errEl = document.getElementById('nu-error');
+
+      if (!username || !password) {
+        errEl.textContent = 'Username and password required.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const res = await apiFetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Failed to create user.';
+        errEl.style.display = 'block';
+        return;
+      }
+      closeModal();
+      alert(`User "${username}" created with private workspace!`);
+    }
+
+    async function loadUsersTable() {
+      const res = await apiFetch('/api/users');
+      const users = await res.json();
+      const container = document.getElementById('users-table-container');
+      if (!container) return;
+      container.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          ${users.map(u => `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid var(--card-border);">
+              <div>
+                <div style="font-weight:700; font-size:0.86rem; color:#fff;">👤 ${u.username} ${u.id === 1 ? '<span style="color:#c084fc; font-size:0.75rem;">(Admin)</span>' : ''}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">${u.email || 'No email registered'} • ID: #${u.id}</div>
+              </div>
+              ${u.id !== 1 ? `<button class="btn-secondary" style="color:#f87171; padding:4px 8px; font-size:0.75rem;" onclick="deleteUser(${u.id})">Delete</button>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function deleteUser(id) {
+      if (!confirm(`Delete user #${id}? This will remove their sessions and personal workspace.`)) return;
+      await apiFetch(`/api/users/${id}`, { method: 'DELETE' });
+      loadUsersTable();
     }
 
     async function submitNewTask() {

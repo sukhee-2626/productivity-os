@@ -215,6 +215,51 @@ const server = http.createServer(async (req, res) => {
     return json(res, { user });
   }
 
+  // User Management: List Users
+  if (pathname === '/api/users' && method === 'GET') {
+    const list = db.prepare('SELECT id, username, email, created_at FROM users ORDER BY id ASC').all();
+    return json(res, list);
+  }
+
+  // User Management: Create User (by admin or logged in user)
+  if (pathname === '/api/users' && method === 'POST') {
+    const b = await parseBody(req);
+    if (!b.username || !b.password) {
+      return json(res, { error: 'Username and password required' }, 400);
+    }
+    const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(b.username);
+    if (existing) {
+      return json(res, { error: 'Username already taken' }, 409);
+    }
+    const passHash = hashPassword(b.password);
+    const info = db.prepare('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)')
+      .run(b.username, b.email || null, passHash);
+    const newUserId = info.lastInsertRowid;
+
+    // Create user's personal workspace
+    const ws = db.prepare('INSERT INTO workspaces (name, slug, is_default) VALUES (?, ?, 1)')
+      .run(`${b.username}'s Personal`, `personal-${newUserId}`);
+    db.prepare("INSERT INTO workspace_members (workspace_id, user_id, role) VALUES (?, ?, 'owner')")
+      .run(ws.lastInsertRowid, newUserId);
+
+    return json(res, {
+      id: newUserId,
+      username: b.username,
+      email: b.email || null,
+      workspace_id: ws.lastInsertRowid
+    }, 201);
+  }
+
+  // User Management: Delete User
+  if (pathname.startsWith('/api/users/') && method === 'DELETE') {
+    const targetId = parseInt(pathname.split('/')[3], 10);
+    if (targetId === 1) {
+      return json(res, { error: 'Cannot delete primary admin user' }, 400);
+    }
+    db.prepare('DELETE FROM users WHERE id = ?').run(targetId);
+    return json(res, { success: true, deletedId: targetId });
+  }
+
   // --- API ROUTES ---
 
   // Clear all workspace data (New User Reset)
@@ -471,6 +516,77 @@ const server = http.createServer(async (req, res) => {
     const info = stmt.run(b.title, b.description || '', b.start_time, b.end_time || b.start_time, b.color || '#3b82f6');
     const event = db.prepare('SELECT * FROM calendar_events WHERE id = ?').get(info.lastInsertRowid);
     return json(res, event, 201);
+  }
+
+  if (pathname.startsWith('/api/calendar/') && method === 'DELETE') {
+    const id = parseInt(pathname.split('/')[3], 10);
+    db.prepare('DELETE FROM calendar_events WHERE id = ?').run(id);
+    return json(res, { success: true, deletedId: id });
+  }
+
+  // Work Schedule Preset Generator
+  if (pathname === '/api/schedule/work' && method === 'POST') {
+    const today = getToday();
+    const b = await parseBody(req);
+    const wsId = b.workspace_id || 3; // default Work workspace
+
+    const scheduleBlocks = [
+      { start: '09:00:00', end: '10:30:00', title: 'Deep Work: Core Architecture & Sprint Delivery', color: '#3b82f6', desc: 'Focus block: High-leverage execution' },
+      { start: '10:30:00', end: '11:00:00', title: 'Daily Standup & Sprint Sync', color: '#10b981', desc: 'Team blockers, roadmap alignment' },
+      { start: '11:00:00', end: '12:30:00', title: 'Feature Development & Coding', color: '#8b5cf6', desc: 'Implementation & bug resolution' },
+      { start: '12:30:00', end: '13:30:00', title: '☕ Lunch & Reset Walk', color: '#f59e0b', desc: 'Healthy reset, zero screens' },
+      { start: '13:30:00', end: '15:00:00', title: 'Code Reviews & Integration Testing', color: '#06b6d4', desc: 'Pull requests, CI/CD, QA' },
+      { start: '15:00:00', end: '15:30:00', title: 'Architecture & Technical RFC Review', color: '#6366f1', desc: 'Design document discussion' },
+      { start: '15:30:00', end: '17:00:00', title: 'Documentation & Sprint Polish', color: '#3b82f6', desc: 'API docs, release changelog' },
+      { start: '17:00:00', end: '17:30:00', title: 'Workday Shutdown & Evening Plan', color: '#10b981', desc: 'Review achievements & queue tomorrow' }
+    ];
+
+    const insertEvent = db.prepare('INSERT INTO calendar_events (title, description, start_time, end_time, color) VALUES (?, ?, ?, ?, ?)');
+    const createdEvents = [];
+    for (const sb of scheduleBlocks) {
+      const info = insertEvent.run(sb.title, sb.desc, `${today} ${sb.start}`, `${today} ${sb.end}`, sb.color);
+      createdEvents.push({ id: info.lastInsertRowid, ...sb, date: today });
+    }
+
+    // Seed accompanying work tasks if none exist
+    const workTaskCount = db.prepare('SELECT COUNT(*) as c FROM tasks WHERE workspace_id = ?').get(wsId).c;
+    if (workTaskCount === 0) {
+      const p = db.prepare("INSERT INTO projects (title, description, workspace_id, deadline, color) VALUES ('Core Engineering Sprint', 'Main product deliverables', ?, date('now', '+14 days'), '#3b82f6')").run(wsId);
+      const insertTask = db.prepare("INSERT INTO tasks (title, description, project_id, workspace_id, status, priority, energy_level, due_date, estimated_duration, labels_json) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      insertTask.run('Review & merge open pull requests', 'Verify CI test suite and performance benchmarks', p.lastInsertRowid, wsId, 'todo', 'urgent', 4, today, 45, '["CodeReview","Team"]');
+      insertTask.run('Deploy staging backend API service', 'Run database migration scripts and smoke tests', p.lastInsertRowid, wsId, 'in_progress', 'high', 5, today, 90, '["DevOps","Release"]');
+      insertTask.run('Resolve customer-reported webhook retry bug', 'Implement exponential backoff with jitter', p.lastInsertRowid, wsId, 'todo', 'high', 4, today, 60, '["Bugfix","API"]');
+    }
+
+    return json(res, { success: true, count: createdEvents.length, schedule: createdEvents });
+  }
+
+  // Schedule Individual Task
+  if (pathname === '/api/schedule/task' && method === 'POST') {
+    const b = await parseBody(req);
+    if (!b.task_id || !b.start_time) return json(res, { error: 'task_id and start_time required' }, 400);
+
+    const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(b.task_id);
+    if (!task) return json(res, { error: 'Task not found' }, 404);
+
+    const dur = b.duration_minutes || task.estimated_duration || 45;
+    const today = b.date || getToday();
+    const startStr = `${today} ${b.start_time}:00`;
+
+    // Compute end time
+    const [h, m] = b.start_time.split(':').map(Number);
+    let endM = m + dur;
+    let endH = h + Math.floor(endM / 60);
+    endM = endM % 60;
+    const endStr = `${today} ${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}:00`;
+
+    const info = db.prepare('INSERT INTO calendar_events (title, description, start_time, end_time, color) VALUES (?, ?, ?, ?, ?)')
+      .run(`[Task] ${task.title}`, task.description || '', startStr, endStr, b.color || '#8b5cf6');
+
+    db.prepare("UPDATE tasks SET due_date = ?, status = CASE WHEN status = 'backlog' THEN 'todo' ELSE status END WHERE id = ?")
+      .run(today, task.id);
+
+    return json(res, { success: true, eventId: info.lastInsertRowid, task_id: task.id, start: startStr, end: endStr });
   }
 
   // Habits

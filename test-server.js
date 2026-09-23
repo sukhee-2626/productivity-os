@@ -189,7 +189,23 @@ async function runTests() {
   assert.strictEqual(tasksAfterClear.data.length, 0);
   console.log('✔ Single delete, bulk delete, and clear-all tasks valid');
 
-  // 18. Workspace Data Wipe (New User Reset)
+  // 18. Schedule Workday & Task Time-Blocking Engine
+  const workSched = await request('POST', '/api/schedule/work', { workspace_id: 3 }, adminToken);
+  assert.strictEqual(workSched.status, 200);
+  assert.strictEqual(workSched.data.count, 8, 'Must generate 8 structured workday blocks');
+
+  // Schedule individual task
+  const schedTask = await request('POST', '/api/tasks', { title: 'Focus Sprint Item', estimated_duration: 60 }, adminToken);
+  const blockRes = await request('POST', '/api/schedule/task', { task_id: schedTask.data.id, start_time: '14:30', duration_minutes: 60 }, adminToken);
+  assert.strictEqual(blockRes.status, 200);
+  assert.ok(blockRes.data.eventId, 'Calendar block must be created for task');
+
+  // Delete calendar block
+  const delBlock = await request('DELETE', `/api/calendar/${blockRes.data.eventId}`, null, adminToken);
+  assert.strictEqual(delBlock.status, 200);
+  console.log('✔ Work schedule generator and task time-blocking valid');
+
+  // 19. Workspace Data Wipe (New User Reset)
   const clearRes = await request('POST', '/api/workspaces/clear', null, adminToken);
   assert.strictEqual(clearRes.status, 200, 'Workspace clear must be 200');
   const postClearOverview = await request('GET', '/api/overview', null, adminToken);
@@ -200,7 +216,7 @@ async function runTests() {
 
   server.close(() => {
     db.close();
-    console.log('All 18 integration & world-class feature checks passed. ProductivityOS verified.');
+    console.log('All 19 integration & world-class feature checks passed. ProductivityOS verified.');
     process.exit(0);
   });
 }

@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProductivityOS — All-in-One Life & Work Operating System</title>
+  <style>
+    :root {
+      --bg: #07090e;
+      --bg-surface: #0c1017;
+      --card-bg: rgba(15, 21, 32, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(26, 35, 52, 0.85);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --sidebar-w: 240px;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; }
+    body {
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, rgba(59, 130, 246, 0.12), transparent 60%);
+      color: var(--text);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
+
+    /* Layout */
+    #sidebar {
+      width: var(--sidebar-w);
+      background: rgba(10, 14, 22, 0.95);
+      border-right: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      backdrop-filter: blur(20px);
+    }
+
+    .brand {
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #60a5fa, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .nav-group { flex: 1; overflow-y: auto; padding: 12px 10px; display: flex; flex-direction: column; gap: 3px; }
+    .nav-label { font-size: 0.68rem; text-transform: uppercase; color: #64748b; font-weight: 700; padding: 8px 10px 4px; letter-spacing: 0.8px; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text); transform: translateX(2px); }
+    .nav-item.active { background: rgba(59, 130, 246, 0.14); color: #60a5fa; font-weight: 600; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .nav-item .icon { font-size: 1.05rem; width: 20px; text-align: center; }
+
+    .sidebar-footer { padding: 14px 16px; border-top: 1px solid var(--card-border); font-size: 0.78rem; color: #64748b; display: flex; justify-content: space-between; align-items: center; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; box-shadow: 0 0 8px var(--success); }
+
+    #main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: transparent; }
+
+    /* Topbar */
+    #topbar {
+      height: 60px;
+      border-bottom: 1px solid var(--card-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(10, 14, 22, 0.65);
+      backdrop-filter: blur(16px);
+      z-index: 10;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .search-pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      min-width: 230px;
+      transition: all 0.15s ease;
+    }
+    .search-pill:hover { border-color: rgba(255,255,255,0.18); background: rgba(255,255,255,0.07); color: #fff; }
+    .search-pill kbd {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      margin-left: auto;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .badge-streak { color: #f97316; border-color: rgba(249, 115, 22, 0.3); background: rgba(249, 115, 22, 0.1); }
+    .badge-xp { color: #c084fc; border-color: rgba(192, 132, 252, 0.3); background: rgba(192, 132, 252, 0.1); }
+    .badge-score { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+
+    .btn-action {
+      background: linear-gradient(135deg, #3b82f6, #6366f1);
+      color: #fff;
+      border: none;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+    .btn-action:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35); }
+    .btn-action:active { transform: translateY(0); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.18); }
+
+    /* Content Area */
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+    }
+
+    .view-container { display: none; }
+    .view-container.active { display: block; animation: fadeIn 0.18s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Cards & Grids */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .card:hover { border-color: rgba(255, 255, 255, 0.14); }
+    .card-title { font-size: 0.88rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Progress bar */
+    .progress-track { height: 7px; background: rgba(255, 255, 255, 0.08); border-radius: 10px; overflow: hidden; position: relative; margin: 10px 0; }
+    .progress-fill { height: 100%; border-radius: 10px; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    /* Tasks list */
+    .task-item {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .task-item:hover { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.16); transform: translateX(2px); }
+    .task-checkbox {
+      width: 18px;
+      height: 18px;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .task-checkbox.checked { background: var(--success); border-color: var(--success); color: white; font-weight: 800; font-size: 0.75rem; }
+    .task-details { flex: 1; min-width: 0; }
+    .task-title-text { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .task-title-text.completed { text-decoration: line-through; color: #64748b; }
+    .task-meta { font-size: 0.74rem; color: #64748b; display: flex; gap: 8px; margin-top: 3px; align-items: center; }
+    .priority-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+    .p-urgent { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+    .p-high { background: var(--warning); }
+    .p-medium { background: var(--primary); }
+    .p-low { background: #64748b; }
+
+    /* Kanban */
+    .kanban-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; height: calc(100vh - 160px); overflow-x: auto; }
+    .kanban-col { background: rgba(14, 19, 29, 0.55); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; max-height: 100%; transition: background 0.15s; }
+    .kanban-col.dragover { border-color: var(--primary); background: rgba(59,130,246,0.12); }
+    .kanban-col-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--card-border); }
+    .kanban-cards { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; }
+    .kanban-card { background: rgba(255, 255, 255, 0.035); border: 1px solid var(--card-border); border-radius: 9px; padding: 11px 12px; cursor: grab; user-select: none; transition: all 0.15s; }
+    .kanban-card:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-1px); }
+    .kanban-card:active { cursor: grabbing; transform: scale(0.98); }
+
+    /* Interactive Calendar Time-blocking Grid */
+    .calendar-grid { display: flex; flex-direction: column; border: 1px solid var(--card-border); border-radius: var(--radius); background: rgba(11, 16, 25, 0.5); overflow: hidden; }
+    .calendar-slot { display: flex; border-bottom: 1px solid rgba(255,255,255,0.04); min-height: 48px; position: relative; cursor: pointer; }
+    .calendar-slot:hover { background: rgba(255,255,255,0.02); }
+    .slot-hour { width: 75px; padding: 10px 14px; font-size: 0.76rem; font-weight: 700; color: #64748b; font-family: monospace; border-right: 1px solid rgba(255,255,255,0.04); flex-shrink: 0; }
+    .slot-content { flex: 1; padding: 6px 12px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .time-block-pill { padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+
+    /* Habit Heatmap */
+    .heatmap-container { display: flex; gap: 5px; flex-wrap: wrap; padding: 10px 0; }
+    .heatmap-cell { width: 15px; height: 15px; border-radius: 3px; background: rgba(255,255,255,0.05); transition: transform 0.1s; cursor: pointer; }
+    .heatmap-cell:hover { transform: scale(1.25); z-index: 2; }
+    .heat-lvl-0 { background: rgba(255,255,255,0.05); }
+    .heat-lvl-1 { background: rgba(16, 185, 129, 0.25); }
+    .heat-lvl-2 { background: rgba(16, 185, 129, 0.5); }
+    .heat-lvl-3 { background: rgba(16, 185, 129, 0.75); }
+    .heat-lvl-4 { background: #10b981; box-shadow: 0 0 8px rgba(16, 185, 129, 0.4); }
+
+    /* Focus Mode */
+    .focus-hero { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 36px 20px; text-align: center; }
+    .focus-timer { font-size: 5.5rem; font-weight: 900; letter-spacing: -3px; font-family: monospace; margin: 16px 0; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .timer-controls { display: flex; gap: 14px; }
+    .btn-timer { padding: 12px 28px; border-radius: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-timer:active { transform: scale(0.96); }
+    .btn-start { background: var(--success); color: #fff; box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+    .btn-stop { background: var(--danger); color: #fff; }
+
+    /* Soundscape buttons */
+    .sound-btn {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sound-btn.active {
+      background: rgba(59,130,246,0.15);
+      border-color: var(--primary);
+      color: #60a5fa;
+      box-shadow: 0 0 10px rgba(59,130,246,0.25);
+    }
+
+    /* AI Assistant chat */
+    .ai-chat-box { height: 350px; overflow-y: auto; border: 1px solid var(--card-border); border-radius: var(--radius); padding: 16px; background: rgba(10, 14, 22, 0.5); display: flex; flex-direction: column; gap: 12px; }
+    .ai-bubble { max-width: 82%; padding: 10px 14px; border-radius: 12px; font-size: 0.86rem; line-height: 1.45; }
+    .ai-user { align-self: flex-end; background: #2563eb; color: #fff; border-bottom-right-radius: 2px; }
+    .ai-bot { align-self: flex-start; background: rgba(255, 255, 255, 0.06); border-bottom-left-radius: 2px; border: 1px solid var(--card-border); }
+
+    /* Modal Quick Capture */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
+    .modal { background: #0f1522; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; width: 92%; max-width: 520px; padding: 24px; box-shadow: 0 24px 60px rgba(0,0,0,0.6); }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .input-field { width: 100%; padding: 10px 12px; background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); border-radius: 8px; color: #fff; font-size: 0.88rem; outline: none; transition: border-color 0.15s; }
+    .input-field:focus { border-color: var(--primary); background: rgba(255,255,255,0.07); }
+
+    /* Command Palette Item */
+    .cmd-item { padding: 9px 12px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 0.86rem; color: var(--text-muted); }
+    .cmd-item:hover, .cmd-item.selected { background: rgba(59,130,246,0.15); color: #fff; }
+
+    @media (max-width: 900px) {
+      #sidebar { width: 68px; }
+      .brand span, .nav-item span, .nav-label, .sidebar-footer span { display: none; }
+      .kanban-board { grid-template-columns: repeat(2, 280px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <nav id="sidebar">
+    <div class="brand">
+      <span style="font-size: 1.3rem;">⚡</span>
+      <span>ProductivityOS</span>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Core Execution</div>
+      <div class="nav-item active" onclick="showView('home')"><span class="icon">🏠</span><span>Home</span></div>
+      <div class="nav-item" onclick="showView('my-day')"><span class="icon">⚡</span><span>My Day</span></div>
+      <div class="nav-item" onclick="showView('kanban')"><span class="icon">📊</span><span>Kanban</span></div>
+      <div class="nav-item" onclick="showView('tasks')"><span class="icon">📋</span><span>All Tasks</span></div>
+      <div class="nav-item" onclick="showView('calendar')"><span class="icon">📅</span><span>Time-Block Grid</span></div>
+
+      <div class="nav-label">Architecture</div>
+      <div class="nav-item" onclick="showView('goals')"><span class="icon">🎯</span><span>Goals & Projects</span></div>
+      <div class="nav-item" onclick="showView('habits')"><span class="icon">🔁</span><span>Habits & Matrix</span></div>
+      <div class="nav-item" onclick="showView('focus')"><span class="icon">⏱</span><span>Deep Work & Audio</span></div>
+      <div class="nav-item" onclick="showView('analytics')"><span class="icon">📈</span><span>Analytics & XP</span></div>
+      <div class="nav-item" onclick="showView('whiteboard')"><span class="icon">🎨</span><span>Whiteboard Canvas</span></div>
+
+      <div class="nav-label">Knowledge & Reflection</div>
+      <div class="nav-item" onclick="showView('notes')"><span class="icon">📝</span><span>Second Brain</span></div>
+      <div class="nav-item" onclick="showView('journal')"><span class="icon">📓</span><span>Journal & Reviews</span></div>
+      <div class="nav-item" onclick="showView('braindump')"><span class="icon">🧠</span><span>Brain Dump</span></div>
+      <div class="nav-item" onclick="showView('ai')"><span class="icon">🤖</span><span>AI Assistant</span></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div><span class="status-dot"></span> <span style="margin-left: 6px;">SQLite Local</span></div>
+      <span style="font-size: 0.75rem; color: #64748b; cursor:pointer;" onclick="openModal('shortcuts')">⌨ Shortcuts</span>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main id="main">
+    <!-- Topbar -->
+    <header id="topbar">
+      <div class="topbar-left">
+        <div class="search-pill" onclick="openModal('search')">
+          <span>🔍</span>
+          <span id="quick-search-placeholder">Command Palette...</span>
+          <kbd>Ctrl K</kbd>
+        </div>
+        <div style="font-size: 0.84rem; color: var(--text-muted); font-weight: 500;" id="date-display">Today</div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Workspace Selector -->
+        <select id="workspace-select" class="badge" style="background:#131a27; color:#fff; border:1px solid var(--card-border); outline:none; cursor:pointer;" onchange="changeWorkspace(this.value)">
+          <option value="all">🌐 All Workspaces</option>
+          <option value="1">🏠 Personal</option>
+          <option value="2">🎓 College</option>
+          <option value="3">💼 Work</option>
+        </select>
+
+        <button class="btn-secondary" onclick="openModal('templates')">⚡ Templates</button>
+        <button class="btn-secondary" onclick="openModal('evening-review')">🌙 Review</button>
+
+        <div class="badge badge-xp">👑 <span id="user-level">Lvl 1</span> (<span id="user-xp">0</span> XP)</div>
+        <div class="badge badge-streak">🔥 <span id="streak-count">0</span> Streak</div>
+        <div class="badge badge-score">⚡ <span id="score-count">0</span>/100</div>
+
+        <div id="user-profile-badge" class="badge" style="background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.25); color:#60a5fa;">
+          👤 <span id="current-user-name">admin</span>
+        </div>
+
+        <button class="badge" style="cursor:pointer; color:#f87171;" onclick="clearAllData()">🗑 Reset</button>
+        <button class="btn-action" onclick="openModal('task')">+ New Task</button>
+      </div>
+    </header>
+
+    <!-- Views Container -->
+    <div id="content">
+
+      <!-- 1. HOME DASHBOARD -->
+      <div id="view-home" class="view-container active">
+        <!-- Risk & Capacity Alert Banner -->
+        <div id="risk-banner" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); border-radius:var(--radius); padding:12px 18px; margin-bottom:18px; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:1.2rem;">⚠️</span>
+            <div>
+              <strong style="color:#f87171;" id="risk-title">Deadline & Capacity Risk Alert</strong>
+              <div style="font-size:0.8rem; color:var(--text-muted);" id="risk-desc">Tasks approaching deadline. Available focus time constrained.</div>
+            </div>
+          </div>
+          <button class="btn-action" style="background:rgba(239,68,68,0.2); color:#fca5a5; font-size:0.8rem;" onclick="showView('my-day')">Auto-Schedule →</button>
+        </div>
+
+        <div style="margin-bottom: 22px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h1 style="font-size: 1.8rem; font-weight: 800; letter-spacing: -0.5px;">Welcome back, <span id="user-greeting">admin</span> 👋</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">Unified system overview across Goals, Projects, Kanban, and Daily Execution.</p>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase;">Productivity Score</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #10b981;" id="home-score">0 <span style="font-size: 0.85rem; color: var(--text-muted);">/ 100</span></div>
+          </div>
+        </div>
+
+        <div class="grid-4" style="margin-bottom: 22px;">
+          <div class="card">
+            <div class="card-title">Daily Execution</div>
+            <div style="font-size: 1.45rem; font-weight: 800;" id="task-progress-ratio">0 / 0 tasks</div>
+            <div class="progress-track"><div class="progress-fill" id="task-progress-bar" style="width: 0%;"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Deep Work Focus</div>
+            <div style="font-size: 1.45rem; font-weight: 800; color: #60a5fa;" id="home-focus-mins">0 mins</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;">Target: 180m high-energy block</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Habit Momentum</div>
+            <div style="font-size: 1.45rem; font-weight: 800; color: #10b981;" id="home-habit-ratio">0 / 0 logged</div>
+            <div class="progress-track"><div class="progress-fill" id="home-habit-bar" style="width: 0%; background: #10b981;"></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Level & Mastery</div>
+            <div style="font-size: 1.45rem; font-weight: 800; color: #c084fc;" id="home-level-title">Novice (Lvl 1)</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 6px;" id="home-level-progress">0% to Level 2</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>🎯 Today's Task Queue</span>
+              <span style="font-size: 0.75rem; color: var(--primary); cursor: pointer;" onclick="showView('tasks')">View All →</span>
+            </div>
+            <div id="home-task-list">Loading queue...</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>🔁 Habits Checklist</span>
+              <span style="font-size: 0.75rem; color: var(--primary); cursor: pointer;" onclick="showView('habits')">Matrix →</span>
+            </div>
+            <div id="home-habit-list" style="margin-bottom: 20px;">Loading habits...</div>
+
+            <div class="card-title" style="margin-top: 20px;">
+              <span>📅 Scheduled Commitments</span>
+              <span style="font-size: 0.75rem; color: var(--primary); cursor: pointer;" onclick="showView('calendar')">Grid →</span>
+            </div>
+            <div id="home-schedule-list">Loading schedule...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. MY DAY -->
+      <div id="view-my-day" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">⚡ My Day Planner & Auto-Scheduler</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Optimal sequencing based on energy levels, estimates, and break frequency.</p>
+          </div>
+          <button class="btn-action" onclick="runAiSchedule()">⚡ Auto-Schedule with AI</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">🎯 Priority Task Pool</div>
+            <div id="my-day-queue">Loading...</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">⏱ Timeline & Smart Intervals</div>
+            <div id="my-day-timeline">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. KANBAN WITH DRAG & DROP -->
+      <div id="view-kanban" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">📊 Kanban Pipeline</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Single source of truth. Drag and drop cards between lifecycle columns.</p>
+          </div>
+          <button class="btn-action" onclick="openModal('task')">+ Add Card</button>
+        </div>
+
+        <div class="kanban-board">
+          <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'backlog')">
+            <div class="kanban-col-header"><span>Backlog</span><span id="kb-count-backlog">0</span></div>
+            <div class="kanban-cards" id="kb-col-backlog"></div>
+          </div>
+          <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'todo')">
+            <div class="kanban-col-header"><span>To Do</span><span id="kb-count-todo">0</span></div>
+            <div class="kanban-cards" id="kb-col-todo"></div>
+          </div>
+          <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'in_progress')">
+            <div class="kanban-col-header"><span>In Progress</span><span id="kb-count-in_progress">0</span></div>
+            <div class="kanban-cards" id="kb-col-in_progress"></div>
+          </div>
+          <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'review')">
+            <div class="kanban-col-header"><span>Review</span><span id="kb-count-review">0</span></div>
+            <div class="kanban-cards" id="kb-col-review"></div>
+          </div>
+          <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'done')">
+            <div class="kanban-col-header"><span>Done</span><span id="kb-count-done">0</span></div>
+            <div class="kanban-cards" id="kb-col-done"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. ALL TASKS -->
+      <div id="view-tasks" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <h1 style="font-size: 1.6rem; font-weight: 800;">📋 Task Inventory</h1>
+          <button class="btn-action" onclick="openModal('task')">+ Add Task</button>
+        </div>
+        <div class="card">
+          <div id="all-tasks-list">Loading...</div>
+        </div>
+      </div>
+
+      <!-- 5. TIME-BLOCK GRID CALENDAR -->
+      <div id="view-calendar" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">📅 Time-Block Grid Calendar</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Click any slot to schedule focus commitments directly in SQLite.</p>
+          </div>
+          <button class="btn-action" onclick="openModal('event')">+ Add Event</button>
+        </div>
+        <div class="calendar-grid" id="interactive-calendar-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 6. GOALS & PROJECTS -->
+      <div id="view-goals" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">🎯 Goals → Milestones → Projects</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Cascade: Vision cascades into monthly milestones, projects, and daily tasks.</p>
+          </div>
+          <button class="btn-action" onclick="openModal('goal')">+ New Goal</button>
+        </div>
+        <div id="goals-tree-list">Loading goals...</div>
+      </div>
+
+      <!-- 7. HABITS & 35-DAY MATRIX -->
+      <div id="view-habits" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">🔁 Habit Architecture & Consistency Heatmap</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">GitHub-style activity matrix tracking daily execution streaks.</p>
+          </div>
+          <button class="btn-action" onclick="openModal('habit')">+ New Habit</button>
+        </div>
+
+        <div class="card" style="margin-bottom: 18px;">
+          <div class="card-title">35-Day Consistency Heatmap</div>
+          <div class="heatmap-container" id="habit-heatmap-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Active Habits</div>
+          <div id="habits-full-list">Loading habits...</div>
+        </div>
+      </div>
+
+      <!-- 8. FOCUS MODE & AMBIENT AUDIO -->
+      <div id="view-focus" class="view-container">
+        <div class="card focus-hero">
+          <div style="font-size: 0.86rem; font-weight: 700; color: #60a5fa; text-transform: uppercase; letter-spacing: 1px;">Distraction-Free Deep Work</div>
+          <div class="focus-timer" id="timer-display">25:00</div>
+          <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 20px;" id="focus-task-name">Current Task: Select a task to focus on</div>
+
+          <div class="timer-controls">
+            <button class="btn-timer btn-start" id="btn-timer-toggle" onclick="toggleTimer()">▶ Start Focus</button>
+            <button class="btn-timer btn-stop" onclick="resetTimer()">⏹ End Session</button>
+          </div>
+
+          <!-- 4 Procedural Soundscapes -->
+          <div style="margin-top: 28px; width: 100%; max-width: 480px;">
+            <div style="font-size: 0.76rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 10px;">Procedural Soundscapes (Native Web Audio)</div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+              <button class="sound-btn" id="sbtn-rain" onclick="setSoundscape('rain')">🌧 Rain</button>
+              <button class="sound-btn" id="sbtn-ocean" onclick="setSoundscape('ocean')">🌊 Ocean</button>
+              <button class="sound-btn" id="sbtn-binaural" onclick="setSoundscape('binaural')">🧠 40Hz</button>
+              <button class="sound-btn" id="sbtn-drone" onclick="setSoundscape('drone')">✨ Drone</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 9. ANALYTICS & GAMIFICATION -->
+      <div id="view-analytics" class="view-container">
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 18px;">📈 Productivity Analytics & XP Leveling</h1>
+        <div class="grid-2" style="margin-bottom: 20px;">
+          <div class="card">
+            <div class="card-title">Score Calculation Formula (Transparent)</div>
+            <div style="font-size: 0.88rem; line-height: 1.7; color: var(--text-muted);">
+              <div>• Task Completion (35%): <span id="an-task-score" style="color:#fff; font-weight:600;">0%</span></div>
+              <div>• Focus Time (30%): <span id="an-focus-score" style="color:#fff; font-weight:600;">0%</span></div>
+              <div>• Habit Consistency (20%): <span id="an-habit-score" style="color:#fff; font-weight:600;">0%</span></div>
+              <div>• Planning Accuracy (15%): <span id="an-plan-score" style="color:#fff; font-weight:600;">0%</span></div>
+            </div>
+            <div style="margin-top: 16px; font-size: 1.4rem; font-weight: 800; color: #10b981;">Overall Score: <span id="an-total-score">0</span>/100</div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Gamification Achievements & Badges</div>
+            <div id="badges-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+              <!-- Badges populated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. WHITEBOARD CANVAS -->
+      <div id="view-whiteboard" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div>
+            <h1 style="font-size: 1.6rem; font-weight: 800;">🎨 Visual Architecture & Mind Map Canvas</h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem;">Drag cards to organize knowledge graph nodes.</p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-action" onclick="addWhiteboardNode('goal')">+ Add Goal Node</button>
+            <button class="btn-action" style="background:#8b5cf6;" onclick="addWhiteboardNode('task')">+ Add Task Node</button>
+            <button class="btn-secondary" onclick="clearWhiteboard()">Reset Layout</button>
+          </div>
+        </div>
+        <div class="card" style="padding: 0; overflow: hidden; position: relative; height: calc(100vh - 180px); background: #070a10;">
+          <canvas id="whiteboard-canvas" style="width: 100%; height: 100%; display: block;"></canvas>
+          <div style="position: absolute; bottom: 12px; left: 16px; font-size: 0.75rem; color: #64748b;">
+            💡 Click and drag cards to position your knowledge graph.
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. NOTES -->
+      <div id="view-notes" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <h1 style="font-size: 1.6rem; font-weight: 800;">📝 Second Brain & Notes</h1>
+          <button class="btn-action" onclick="openModal('note')">+ New Note</button>
+        </div>
+        <div class="grid-2" id="notes-list">Loading notes...</div>
+      </div>
+
+      <!-- 12. JOURNAL -->
+      <div id="view-journal" class="view-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+          <h1 style="font-size: 1.6rem; font-weight: 800;">📓 Productivity Diary & Evening Reflections</h1>
+          <button class="btn-action" onclick="openModal('evening-review')">+ Evening Review</button>
+        </div>
+        <div id="journal-list">Loading reflections...</div>
+      </div>
+
+      <!-- 13. BRAIN DUMP -->
+      <div id="view-braindump" class="view-container">
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 6px;">🧠 Brain Dump Engine</h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 20px;">Type raw thoughts. The engine parses tasks, estimates energy/priority, and injects directly into SQLite.</p>
+        <div class="card">
+          <textarea id="braindump-input" rows="6" class="input-field" style="font-family: inherit; resize: vertical;" placeholder="e.g. Finish Java inheritance assignment, call friend about notes, buy coffee beans, review DSA graph algorithms Friday"></textarea>
+          <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+            <button class="btn-action" onclick="submitBrainDump()">🚀 Parse & Create Tasks</button>
+          </div>
+        </div>
+        <div id="braindump-results" style="margin-top: 20px;"></div>
+      </div>
+
+      <!-- 14. AI ASSISTANT -->
+      <div id="view-ai" class="view-container">
+        <h1 style="font-size: 1.6rem; font-weight: 800; margin-bottom: 6px;">🤖 AI Productivity Assistant</h1>
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 18px;">Context-aware planning engine connected to your live database state.</p>
+        <div class="card">
+          <div class="ai-chat-box" id="ai-chat-history">
+            <div class="ai-bubble ai-bot">Hello! I am your FlowOS Assistant. I have direct access to your local SQLite database. Ask me to plan your day, prioritize tasks, or diagnose bottlenecks.</div>
+          </div>
+          <div style="display: flex; gap: 8px; margin: 12px 0;">
+            <button class="btn-secondary" style="font-size:0.75rem;" onclick="sendAiPrompt('Plan my day')">⚡ Plan my day</button>
+            <button class="btn-secondary" style="font-size:0.75rem;" onclick="sendAiPrompt('What should I do first?')">🎯 What should I do first?</button>
+            <button class="btn-secondary" style="font-size:0.75rem;" onclick="sendAiPrompt('Analyze my bottlenecks')">📈 Analyze bottlenecks</button>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" id="ai-prompt-input" class="input-field" placeholder="Ask AI anything..." onkeydown="if(event.key==='Enter') sendAiMessage()">
+            <button class="btn-action" onclick="sendAiMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODALS -->
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="auth-modal" style="display:none; z-index:9999; background:rgba(7,9,14,0.95); backdrop-filter:blur(20px);">
+    <div class="modal" style="max-width:380px; border-color:rgba(59,130,246,0.3); box-shadow:0 0 50px rgba(59,130,246,0.2);">
+      <div style="text-align:center; margin-bottom:20px;">
+        <span style="font-size:2.4rem;">⚡</span>
+        <h2 style="font-size:1.35rem; font-weight:800; margin-top:8px; background:linear-gradient(135deg,#60a5fa,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">ProductivityOS</h2>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Sign in to your local workspace</p>
+      </div>
+
+      <div style="display:flex; border-bottom:1px solid var(--card-border); margin-bottom:18px;">
+        <div id="auth-tab-login" class="nav-item active" style="flex:1; text-align:center; justify-content:center; border-radius:8px 8px 0 0;" onclick="switchAuthMode('login')">Sign In</div>
+        <div id="auth-tab-register" class="nav-item" style="flex:1; text-align:center; justify-content:center; border-radius:8px 8px 0 0;" onclick="switchAuthMode('register')">Register</div>
+      </div>
+
+      <div id="auth-error" style="display:none; color:#f87171; font-size:0.8rem; margin-bottom:12px; padding:8px; background:rgba(239,68,68,0.1); border-radius:6px; text-align:center;"></div>
+
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="auth-username" class="input-field" placeholder="Username" autofocus>
+      </div>
+
+      <div class="form-group" id="auth-email-group" style="display:none;">
+        <label>Email (Optional)</label>
+        <input type="email" id="auth-email" class="input-field" placeholder="name@example.com">
+      </div>
+
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="auth-password" class="input-field" placeholder="Password" onkeydown="if(event.key==='Enter') submitAuth()">
+      </div>
+
+      <button class="btn-action" style="width:100%; justify-content:center; padding:10px; margin-top:10px;" onclick="submitAuth()" id="auth-submit-btn">Sign In</button>
+
+      <div style="font-size:0.75rem; color:#64748b; text-align:center; margin-top:16px;">
+        Default login: <code style="color:#94a3b8;">admin</code> / <code style="color:#94a3b8;">admin123</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERIC APP MODAL -->
+  <div class="modal-overlay" id="global-modal" onclick="if(event.target===this) closeModal()">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <script>
+    // State
+    let currentView = 'home';
+    let timerSeconds = 25 * 60;
+    let timerInterval = null;
+    let isTimerRunning = false;
+    let selectedWorkspace = 'all';
+
+    // Auth State
+    let authToken = localStorage.getItem('pos_token') || '';
+    let currentUser = null;
+    let authMode = 'login';
+
+    function switchAuthMode(mode) {
+      authMode = mode;
+      document.getElementById('auth-tab-login').classList.toggle('active', mode === 'login');
+      document.getElementById('auth-tab-register').classList.toggle('active', mode === 'register');
+      document.getElementById('auth-email-group').style.display = mode === 'register' ? 'block' : 'none';
+      document.getElementById('auth-submit-btn').textContent = mode === 'register' ? 'Create Account' : 'Sign In';
+      document.getElementById('auth-error').style.display = 'none';
+    }
+
+    async function submitAuth() {
+      const username = document.getElementById('auth-username').value.trim();
+      const password = document.getElementById('auth-password').value;
+      const email = document.getElementById('auth-email').value.trim();
+      const errEl = document.getElementById('auth-error');
+
+      if (!username || !password) {
+        errEl.textContent = 'Username and password required.';
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const endpoint = authMode === 'register' ? '/api/auth/register' : '/api/auth/login';
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password, email })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errEl.textContent = data.error || 'Authentication failed.';
+          errEl.style.display = 'block';
+          return;
+        }
+        authToken = data.token;
+        currentUser = data.user;
+        localStorage.setItem('pos_token', authToken);
+        document.getElementById('auth-modal').style.display = 'none';
+        document.getElementById('current-user-name').textContent = currentUser.username;
+        loadViewData(currentView);
+        loadGamification();
+      } catch(e) {
+        errEl.textContent = 'Server connection error.';
+        errEl.style.display = 'block';
+      }
+    }
+
+    async function logout() {
+      if (authToken) {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+      }
+      localStorage.removeItem('pos_token');
+      authToken = '';
+      currentUser = null;
+      document.getElementById('auth-modal').style.display = 'flex';
+    }
+
+    async function apiFetch(url, options = {}) {
+      options.headers = options.headers || {};
+      if (authToken) {
+        options.headers['Authorization'] = `Bearer ${authToken}`;
+      }
+      const res = await fetch(url, options);
+      if (res.status === 401) {
+        document.getElementById('auth-modal').style.display = 'flex';
+      }
+      return res;
+    }
+
+    function showView(viewName) {
+      currentView = viewName;
+      document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.add('active');
+
+      const navEl = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick')?.includes(viewName));
+      if (navEl) navEl.classList.add('active');
+
+      loadViewData(viewName);
+    }
+
+    async function loadViewData(view) {
+      if (view === 'home') { loadOverview(); checkRiskAnalysis(); }
+      else if (view === 'my-day') loadMyDay();
+      else if (view === 'kanban') loadKanban();
+      else if (view === 'tasks') loadAllTasks();
+      else if (view === 'calendar') loadCalendarGrid();
+      else if (view === 'goals') loadGoals();
+      else if (view === 'habits') { loadHabits(); loadHeatmap(); }
+      else if (view === 'analytics') { loadAnalytics(); loadGamification(); }
+      else if (view === 'notes') loadNotes();
+      else if (view === 'journal') loadJournal();
+      else if (view === 'whiteboard') initWhiteboard();
+    }
+
+    function changeWorkspace(val) {
+      selectedWorkspace = val;
+      loadViewData(currentView);
+    }
+
+    // 1. Overview
+    async function loadOverview() {
+      try {
+        const res = await apiFetch(`/api/overview?workspace_id=${selectedWorkspace}`);
+        const data = await res.json();
+
+        document.getElementById('user-greeting').textContent = data.user;
+        document.getElementById('streak-count').textContent = data.streak;
+        document.getElementById('score-count').textContent = data.score.score;
+        document.getElementById('home-score').innerHTML = `${data.score.score} <span style="font-size:0.85rem; color:var(--text-muted)">/ 100</span>`;
+        document.getElementById('date-display').textContent = data.date;
+
+        const m = data.score.metrics;
+        document.getElementById('task-progress-ratio').textContent = `${m.completedTasks} / ${m.totalTasks} tasks`;
+        document.getElementById('task-progress-bar').style.width = `${data.score.breakdown.taskCompletion}%`;
+        document.getElementById('home-focus-mins').textContent = `${m.focusMinutes} mins`;
+        document.getElementById('home-habit-ratio').textContent = `${m.completedHabits} / ${m.totalHabits} logged`;
+        document.getElementById('home-habit-bar').style.width = `${data.score.breakdown.habitConsistency}%`;
+
+        const tasksContainer = document.getElementById('home-task-list');
+        tasksContainer.innerHTML = data.todayTasks.length ? data.todayTasks.map(t => renderTaskHtml(t)).join('') : '<div style="color:var(--text-muted); font-size:0.85rem; padding:10px 0;">No active tasks today. Click "+ New Task" or "Templates" to get started.</div>';
+
+        const habitsContainer = document.getElementById('home-habit-list');
+        habitsContainer.innerHTML = data.habits.length ? data.habits.map(h => `
+          <div class="task-item" onclick="toggleHabit(${h.id})">
+            <div class="task-checkbox ${h.completed_today ? 'checked' : ''}">${h.completed_today ? '✓' : ''}</div>
+            <div class="task-details">
+              <div class="task-title-text ${h.completed_today ? 'completed' : ''}">${h.title}</div>
+              <div class="task-meta">🔥 Streak: ${h.streak_count} days | Target: ${h.target_count} ${h.unit}</div>
+            </div>
+          </div>
+        `).join('') : '<div style="color:var(--text-muted); font-size:0.85rem;">No habits configured yet.</div>';
+
+        const schedContainer = document.getElementById('home-schedule-list');
+        schedContainer.innerHTML = data.schedule.length ? data.schedule.map(s => `
+          <div class="timeline-row" style="display:flex; gap:12px; padding:6px 0; align-items:center;">
+            <div style="font-family:monospace; font-size:0.78rem; color:#60a5fa; width:55px;">${s.start_time.split(' ')[1]?.slice(0,5) || 'Event'}</div>
+            <div style="flex:1; padding:7px 12px; border-radius:6px; background:rgba(59,130,246,0.1); border-left:3px solid ${s.color}; font-size:0.82rem;">${s.title}</div>
+          </div>
+        `).join('') : '<div style="color:var(--text-muted); font-size:0.85rem;">No calendar commitments for today.</div>';
+
+        loadGamification();
+      } catch (err) {
+        console.error('Overview load error:', err);
+      }
+    }
+
+    // Gamification
+    async function loadGamification() {
+      try {
+        const res = await apiFetch('/api/gamification');
+        const data = await res.json();
+        document.getElementById('user-level').textContent = `Lvl ${data.level}`;
+        document.getElementById('user-xp').textContent = data.xp;
+        document.getElementById('home-level-title').textContent = `${data.level > 3 ? 'Master' : 'Novice'} (Lvl ${data.level})`;
+        document.getElementById('home-level-progress').textContent = `${data.levelProgress}% towards Lvl ${data.level + 1}`;
+
+        const container = document.getElementById('badges-container');
+        if (container) {
+          container.innerHTML = data.badges.map(b => `
+            <div style="padding:10px; border-radius:8px; background:rgba(255,255,255,${b.unlocked ? '0.05' : '0.015'}); border:1px solid ${b.unlocked ? 'rgba(59,130,246,0.3)' : 'var(--card-border)'}; display:flex; align-items:center; gap:10px; opacity:${b.unlocked ? 1 : 0.4};">
+              <span style="font-size:1.4rem;">${b.icon}</span>
+              <div>
+                <div style="font-size:0.82rem; font-weight:700;">${b.name}</div>
+                <div style="font-size:0.72rem; color:var(--text-muted);">${b.desc}</div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch(e){}
+    }
+
+    // Risk Analysis
+    async function checkRiskAnalysis() {
+      try {
+        const res = await apiFetch('/api/risk-analysis');
+        const data = await res.json();
+        const banner = document.getElementById('risk-banner');
+        if (data.totalRisks > 0) {
+          banner.style.display = 'flex';
+          document.getElementById('risk-title').textContent = `⚠️ Capacity & Deadline Risk (${data.totalRisks} flags)`;
+          document.getElementById('risk-desc').textContent = `${data.urgentTasks.length} urgent tasks pending. Focus capacity may be constrained.`;
+        } else {
+          banner.style.display = 'none';
+        }
+      } catch(e) {}
+    }
+
+    function renderTaskHtml(t) {
+      const isDone = t.status === 'done';
+      return `
+        <div class="task-item">
+          <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskStatus(${t.id}, '${t.status}')">
+            ${isDone ? '✓' : ''}
+          </div>
+          <div class="task-details" onclick="selectTaskForFocus('${t.title.replace(/'/g, "\\'")}', ${t.id})">
+            <div class="task-title-text ${isDone ? 'completed' : ''}">
+              <span class="priority-dot p-${t.priority}"></span> ${t.title}
+            </div>
+            <div class="task-meta">
+              <span>${t.project_title ? '@' + t.project_title : 'Direct'}</span>
+              <span>•</span>
+              <span>⏱ ${t.estimated_duration || 30}m</span>
+              <span>•</span>
+              <span style="text-transform: capitalize;">${t.priority}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function toggleTaskStatus(id, currentStatus) {
+      const newStatus = currentStatus === 'done' ? 'todo' : 'done';
+      await apiFetch(`/api/tasks/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      loadViewData(currentView);
+    }
+
+    async function toggleHabit(id) {
+      await apiFetch(`/api/habits/${id}/toggle`, { method: 'POST' });
+      loadViewData(currentView);
+    }
+
+    // 2. My Day
+    async function loadMyDay() {
+      const res = await apiFetch('/api/my-day');
+      const data = await res.json();
+      const q = document.getElementById('my-day-queue');
+      q.innerHTML = data.tasks.length ? data.tasks.map(t => renderTaskHtml(t)).join('') : '<div style="color:var(--text-muted)">Queue is empty.</div>';
+
+      const tl = document.getElementById('my-day-timeline');
+      tl.innerHTML = data.events.length ? data.events.map(e => `
+        <div class="timeline-row" style="display:flex; gap:12px; padding:8px 0; align-items:center;">
+          <div style="font-family:monospace; font-size:0.8rem; color:#60a5fa; width:65px;">${e.start_time.split(' ')[1]?.slice(0,5)}</div>
+          <div style="flex:1; padding:8px 12px; border-radius:6px; border-left:3px solid ${e.color}; background:rgba(59,130,246,0.1); font-size:0.84rem;">${e.title}</div>
+        </div>
+      `).join('') : '<div style="color:var(--text-muted)">Click "Auto-Schedule with AI" to generate day blocks.</div>';
+    }
+
+    async function runAiSchedule() {
+      const res = await apiFetch('/api/ai/schedule', { method: 'POST' });
+      const data = await res.json();
+      const tl = document.getElementById('my-day-timeline');
+      tl.innerHTML = data.generatedSlots.map(s => `
+        <div class="timeline-row" style="display:flex; gap:12px; padding:8px 0; align-items:center;">
+          <div style="font-family:monospace; font-size:0.8rem; color:#60a5fa; width:95px;">${s.time}</div>
+          <div style="flex:1; padding:8px 12px; border-radius:6px; border-left:3px solid ${s.type === 'break' ? '#10b981' : '#3b82f6'}; background:${s.type === 'break' ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.1)'}; font-size:0.84rem;">
+            ${s.title}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 3. Kanban
+    async function loadKanban() {
+      const res = await apiFetch(`/api/kanban?workspace_id=${selectedWorkspace}`);
+      const cols = await res.json();
+      ['backlog', 'todo', 'in_progress', 'review', 'done'].forEach(col => {
+        const list = cols[col] || [];
+        document.getElementById(`kb-count-${col}`).textContent = list.length;
+        document.getElementById(`kb-col-${col}`).innerHTML = list.map(t => `
+          <div class="kanban-card" draggable="true" ondragstart="handleDragStart(event, ${t.id})">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span class="priority-dot p-${t.priority}"></span>
+              <span style="font-size: 0.72rem; color: var(--text-muted);">${t.project_title ? '@' + t.project_title : ''}</span>
+            </div>
+            <div style="font-size: 0.85rem; font-weight: 600;">${t.title}</div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px;">Est: ${t.estimated_duration || 30}m</div>
+          </div>
+        `).join('');
+      });
+    }
+
+    function handleDragStart(e, taskId) { e.dataTransfer.setData('text/plain', taskId); }
+    function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
+    function handleDragLeave(e) { e.currentTarget.classList.remove('dragover'); }
+    async function handleDrop(e, newStatus) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+      const taskId = e.dataTransfer.getData('text/plain');
+      if (!taskId) return;
+      await apiFetch(`/api/tasks/${taskId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+      loadKanban();
+    }
+
+    // 4. All Tasks
+    async function loadAllTasks() {
+      const res = await apiFetch(`/api/tasks?workspace_id=${selectedWorkspace}`);
+      const tasks = await res.json();
+      document.getElementById('all-tasks-list').innerHTML = tasks.length ? tasks.map(t => renderTaskHtml(t)).join('') : '<div style="color:var(--text-muted)">No tasks found.</div>';
+    }
+
+    // 5. Time-Block Grid Calendar
+    async function loadCalendarGrid() {
+      const res = await apiFetch('/api/calendar');
+      const data = await res.json();
+      const grid = document.getElementById('interactive-calendar-grid');
+      let html = '';
+
+      const hours = ['07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+
+      hours.forEach(h => {
+        const matches = data.events.filter(e => e.start_time.includes(h) || e.start_time.slice(11,16) === h);
+        html += `
+          <div class="calendar-slot" onclick="quickTimeBlock('${h}')">
+            <div class="slot-hour">${h}</div>
+            <div class="slot-content">
+              ${matches.map(m => `
+                <div class="time-block-pill" style="background:rgba(59,130,246,0.18); border-left:3px solid ${m.color}; color:#fff;">
+                  <span>📌</span> <span>${m.title}</span>
+                </div>
+              `).join('')}
+              ${matches.length === 0 ? '<span style="font-size:0.75rem; color:#475569;">+ Click to block time</span>' : ''}
+            </div>
+          </div>
+        `;
+      });
+
+      grid.innerHTML = html;
+    }
+
+    function quickTimeBlock(hour) {
+      const title = prompt(`Enter commitment for ${hour}:`, 'Deep Work Session');
+      if (!title) return;
+      const today = new Date().toISOString().split('T')[0];
+      apiFetch('/api/calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title,
+          start_time: `${today} ${hour}:00`,
+          end_time: `${today} ${hour}:50`,
+          color: '#3b82f6'
+        })
+      }).then(() => loadCalendarGrid());
+    }
+
+    // 6. Goals
+    async function loadGoals() {
+      const res = await apiFetch('/api/goals');
+      const goals = await res.json();
+      document.getElementById('goals-tree-list').innerHTML = goals.length ? goals.map(g => `
+        <div class="card" style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-size: 1.05rem; font-weight: 700;">🎯 ${g.title}</h3>
+            <span style="color: #60a5fa; font-weight: 700;">${g.progress_percentage}%</span>
+          </div>
+          <p style="color: var(--text-muted); font-size: 0.84rem; margin-top: 4px;">${g.description || ''}</p>
+          <div class="progress-track"><div class="progress-fill" style="width: ${g.progress_percentage}%;"></div></div>
+
+          <div style="margin-top: 14px; padding-left: 12px; border-left: 2px solid rgba(255,255,255,0.1);">
+            <div style="font-size: 0.76rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Projects & Milestones</div>
+            ${g.milestones.map(m => `
+              <div style="font-size: 0.82rem; margin-top: 5px;">📌 Milestone: ${m.title} (${m.progress_percentage}%)</div>
+            `).join('')}
+            ${g.projects.map(p => `
+              <div style="font-size: 0.82rem; margin-top: 5px; color: #c084fc;">📁 Project: ${p.title}</div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('') : '<div style="color:var(--text-muted)">No active goals. Click "+ New Goal" or "Templates" to initialize.</div>';
+    }
+
+    // 7. Habits & Heatmap
+    async function loadHabits() {
+      const res = await apiFetch('/api/habits');
+      const habits = await res.json();
+      document.getElementById('habits-full-list').innerHTML = habits.length ? habits.map(h => `
+        <div class="task-item" onclick="toggleHabit(${h.id})">
+          <div class="task-checkbox ${h.completed_today ? 'checked' : ''}">${h.completed_today ? '✓' : ''}</div>
+          <div class="task-details">
+            <div class="task-title-text ${h.completed_today ? 'completed' : ''}">${h.title}</div>
+            <div class="task-meta">🔥 Current Streak: ${h.streak_count} days | 🏆 Best: ${h.best_streak} | Target: ${h.target_count} ${h.unit}</div>
+          </div>
+        </div>
+      `).join('') : '<div style="color:var(--text-muted)">No habits tracked yet.</div>';
+    }
+
+    async function loadHeatmap() {
+      try {
+        const res = await apiFetch('/api/habits/heatmap');
+        const data = await res.json();
+        const grid = document.getElementById('habit-heatmap-grid');
+        grid.innerHTML = data.days.map(d => `
+          <div class="heatmap-cell heat-lvl-${d.level}" title="${d.date}: ${d.count} completed"></div>
+        `).join('');
+      } catch(e){}
+    }
+
+    // 8. Focus Mode & 4 Web Audio Soundscapes
+    let activeTaskId = null;
+    function selectTaskForFocus(title, id) {
+      document.getElementById('focus-task-name').textContent = `Current Task: ${title}`;
+      activeTaskId = id;
+      showView('focus');
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(timerSeconds / 60);
+      const secs = timerSeconds % 60;
+      document.getElementById('timer-display').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    async function toggleTimer() {
+      const btn = document.getElementById('btn-timer-toggle');
+      if (!isTimerRunning) {
+        isTimerRunning = true;
+        btn.textContent = '⏸ Pause';
+        btn.style.background = 'var(--warning)';
+        await apiFetch('/api/focus/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ task_id: activeTaskId, mode: 'pomodoro' })
+        });
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds--;
+            updateTimerDisplay();
+          } else {
+            resetTimer();
+            alert('Focus session complete!');
+          }
+        }, 1000);
+      } else {
+        isTimerRunning = false;
+        btn.textContent = '▶ Resume';
+        btn.style.background = 'var(--success)';
+        clearInterval(timerInterval);
+      }
+    }
+
+    async function resetTimer() {
+      clearInterval(timerInterval);
+      isTimerRunning = false;
+      const btn = document.getElementById('btn-timer-toggle');
+      btn.textContent = '▶ Start Focus';
+      btn.style.background = 'var(--success)';
+      timerSeconds = 25 * 60;
+      updateTimerDisplay();
+      await apiFetch('/api/focus/stop', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ duration_minutes: 25 })
+      });
+      loadOverview();
+    }
+
+    // Procedural Web Audio Sound Engine
+    let audioCtx = null;
+    let activeSoundNodes = [];
+    let currentSoundType = null;
+
+    function getAudioContext() {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function stopAllSoundscapes() {
+      activeSoundNodes.forEach(n => {
+        try { if (n.stop) n.stop(); n.disconnect(); } catch(e){}
+      });
+      activeSoundNodes = [];
+      document.querySelectorAll('.sound-btn').forEach(btn => btn.classList.remove('active'));
+      currentSoundType = null;
+    }
+
+    function setSoundscape(type) {
+      if (currentSoundType === type) {
+        stopAllSoundscapes();
+        return;
+      }
+      stopAllSoundscapes();
+      const ctx = getAudioContext();
+      currentSoundType = type;
+      document.getElementById(`sbtn-${type}`)?.classList.add('active');
+
+      if (type === 'rain') {
+        const bufferSize = 2 * ctx.sampleRate;
+        const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.99886*b0 + white*0.0555;
+          b1 = 0.99332*b1 + white*0.0750;
+          b2 = 0.96900*b2 + white*0.1538;
+          b3 = 0.86650*b3 + white*0.3104;
+          b4 = 0.55000*b4 + white*0.5329;
+          b5 = -0.7616*b5 - white*0.0168;
+          output[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white*0.5362) * 0.035;
+          b6 = white * 0.1159;
+        }
+        const whiteNoise = ctx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+        whiteNoise.loop = true;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 850;
+        whiteNoise.connect(filter);
+        filter.connect(ctx.destination);
+        whiteNoise.start();
+        activeSoundNodes = [whiteNoise, filter];
+
+      } else if (type === 'ocean') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.value = 0.05;
+        const lfo = ctx.createOscillator();
+        lfo.frequency.value = 0.1; // 1 wave every 10 seconds
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = 0.03;
+        lfo.connect(lfoGain.gain);
+        osc.type = 'triangle';
+        osc.frequency.value = 95;
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        lfo.start();
+        activeSoundNodes = [osc, gain, lfo, lfoGain];
+
+      } else if (type === 'binaural') {
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        gain.gain.value = 0.03;
+        osc1.frequency.value = 200;
+        osc2.frequency.value = 240; // 40Hz gamma difference
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start();
+        osc2.start();
+        activeSoundNodes = [osc1, osc2, gain];
+
+      } else if (type === 'drone') {
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 350;
+        const gain = ctx.createGain();
+        gain.gain.value = 0.04;
+        osc1.type = 'sawtooth';
+        osc1.frequency.value = 55; // A1
+        osc2.type = 'sine';
+        osc2.frequency.value = 110.5; // detuned octave
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        osc1.start();
+        osc2.start();
+        activeSoundNodes = [osc1, osc2, filter, gain];
+      }
+    }
+
+    // 9. Analytics
+    async function loadAnalytics() {
+      const res = await apiFetch('/api/analytics');
+      const data = await res.json();
+      document.getElementById('an-task-score').textContent = `${data.score.breakdown.taskCompletion}%`;
+      document.getElementById('an-focus-score').textContent = `${data.score.breakdown.focusTime}%`;
+      document.getElementById('an-habit-score').textContent = `${data.score.breakdown.habitConsistency}%`;
+      document.getElementById('an-plan-score').textContent = `${data.score.breakdown.planningAccuracy}%`;
+      document.getElementById('an-total-score').textContent = data.score.score;
+    }
+
+    // 10. Whiteboard Canvas
+    let wbNodes = [
+      { id: 1, type: 'goal', label: '🎯 Software Engineer', x: 80, y: 80, color: '#3b82f6' },
+      { id: 2, type: 'project', label: '📁 DSA Mastery', x: 280, y: 140, color: '#8b5cf6' },
+      { id: 3, type: 'task', label: '📋 Java Assignment', x: 480, y: 220, color: '#10b981' }
+    ];
+    let draggingNode = null;
+    let dragOffset = { x: 0, y: 0 };
+
+    async function initWhiteboard() {
+      try {
+        const res = await apiFetch('/api/whiteboard');
+        const dbNodes = await res.json();
+        if (dbNodes && dbNodes.length > 0) wbNodes = dbNodes;
+      } catch(e) {}
+
+      const canvas = document.getElementById('whiteboard-canvas');
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      drawWhiteboard();
+
+      canvas.onmousedown = (e) => {
+        const cRect = canvas.getBoundingClientRect();
+        const mx = e.clientX - cRect.left;
+        const my = e.clientY - cRect.top;
+        for (let i = wbNodes.length - 1; i >= 0; i--) {
+          const n = wbNodes[i];
+          if (mx >= n.x && mx <= n.x + 180 && my >= n.y && my <= n.y + 56) {
+            draggingNode = n;
+            dragOffset.x = mx - n.x;
+            dragOffset.y = my - n.y;
+            break;
+          }
+        }
+      };
+
+      window.onmousemove = (e) => {
+        if (!draggingNode) return;
+        const cRect = canvas.getBoundingClientRect();
+        draggingNode.x = e.clientX - cRect.left - dragOffset.x;
+        draggingNode.y = e.clientY - cRect.top - dragOffset.y;
+        drawWhiteboard();
+      };
+
+      window.onmouseup = () => {
+        if (draggingNode) {
+          apiFetch('/api/whiteboard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(draggingNode)
+          });
+          draggingNode = null;
+        }
+      };
+    }
+
+    function drawWhiteboard() {
+      const canvas = document.getElementById('whiteboard-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      for (let i = 0; i < wbNodes.length - 1; i++) {
+        const a = wbNodes[i];
+        const b = wbNodes[i + 1];
+        ctx.beginPath();
+        ctx.moveTo(a.x + 90, a.y + 28);
+        ctx.lineTo(b.x + 90, b.y + 28);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      wbNodes.forEach(n => {
+        ctx.fillStyle = 'rgba(18, 25, 38, 0.95)';
+        ctx.strokeStyle = n.color || '#3b82f6';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(n.x, n.y, 180, 56, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#f1f5f9';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(n.label, n.x + 14, n.y + 32);
+      });
+    }
+
+    function addWhiteboardNode(type) {
+      const label = prompt('Node label:', type === 'goal' ? '🎯 New Goal' : '📋 New Task');
+      if (!label) return;
+      wbNodes.push({
+        id: Date.now(),
+        type,
+        label,
+        x: 100 + Math.random() * 200,
+        y: 100 + Math.random() * 200,
+        color: type === 'goal' ? '#3b82f6' : '#8b5cf6'
+      });
+      drawWhiteboard();
+    }
+
+    function clearWhiteboard() {
+      wbNodes = [
+        { id: 1, type: 'goal', label: '🎯 Software Engineer', x: 80, y: 80, color: '#3b82f6' },
+        { id: 2, type: 'project', label: '📁 DSA Mastery', x: 280, y: 140, color: '#8b5cf6' }
+      ];
+      drawWhiteboard();
+    }
+
+    // 11. Notes
+    async function loadNotes() {
+      const res = await apiFetch('/api/notes');
+      const notes = await res.json();
+      document.getElementById('notes-list').innerHTML = notes.length ? notes.map(n => `
+        <div class="card">
+          <div class="card-title"><span>${n.title}</span><span style="font-size:0.75rem;">${n.category}</span></div>
+          <div style="font-size: 0.86rem; color: var(--text-muted); line-height: 1.5; white-space: pre-wrap;">${n.content}</div>
+        </div>
+      `).join('') : '<div style="color:var(--text-muted)">No notes yet.</div>';
+    }
+
+    // 12. Journal
+    async function loadJournal() {
+      const res = await apiFetch('/api/journal');
+      const list = await res.json();
+      document.getElementById('journal-list').innerHTML = list.length ? list.map(j => `
+        <div class="card" style="margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700;">📅 ${j.date} — ${j.mood}</div>
+            <div style="color: #10b981; font-weight: 600;">Score: ${j.productivity_score}/100</div>
+          </div>
+          <div style="margin-top: 8px; font-size: 0.88rem; color: var(--text-muted); white-space:pre-wrap;">${j.content}</div>
+          <div style="margin-top: 10px; font-size: 0.78rem; color: #64748b;">Tasks Completed: ${j.tasks_completed} | Focus: ${j.focus_minutes}m | Habits: ${j.habits_completed}</div>
+        </div>
+      `).join('') : '<div style="color:var(--text-muted)">No diary entries yet. Use "🌙 Evening Review" to record reflections.</div>';
+    }
+
+    // 13. Brain Dump
+    async function submitBrainDump() {
+      const text = document.getElementById('braindump-input').value.trim();
+      if (!text) return;
+      const res = await apiFetch('/api/brain-dump', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const data = await res.json();
+      document.getElementById('braindump-input').value = '';
+      document.getElementById('braindump-results').innerHTML = `
+        <div class="card" style="border-color: #10b981;">
+          <div style="color: #10b981; font-weight: 700; margin-bottom: 8px;">✅ Converted ${data.processedCount} items into structured tasks:</div>
+          ${data.tasks.map(t => `<div>• ${t.title} [${t.priority}] (${t.label})</div>`).join('')}
+        </div>
+      `;
+      loadOverview();
+    }
+
+    // 14. AI Assistant Chat
+    async function sendAiPrompt(txt) {
+      document.getElementById('ai-prompt-input').value = txt;
+      sendAiMessage();
+    }
+
+    async function sendAiMessage() {
+      const input = document.getElementById('ai-prompt-input');
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const history = document.getElementById('ai-chat-history');
+      history.innerHTML += `<div class="ai-bubble ai-user">${msg}</div>`;
+      input.value = '';
+      history.scrollTop = history.scrollHeight;
+
+      const res = await apiFetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg })
+      });
+      const data = await res.json();
+      history.innerHTML += `<div class="ai-bubble ai-bot">${data.reply}</div>`;
+      history.scrollTop = history.scrollHeight;
+    }
+
+    // Templates & Workflows
+    async function applyTemplate(name) {
+      closeModal();
+      await apiFetch('/api/templates/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template: name })
+      });
+      loadViewData(currentView);
+      alert('Template bundle applied successfully!');
+    }
+
+    // Reset All
+    async function clearAllData() {
+      if (!confirm('Clear all data across all workspaces back to clean new-user state?')) return;
+      await apiFetch('/api/workspaces/clear', { method: 'POST' });
+      loadViewData(currentView);
+    }
+
+    // Modals
+    function openModal(type) {
+      const modal = document.getElementById('global-modal');
+      const body = document.getElementById('modal-body');
+
+      if (type === 'task') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 16px;">Create New Task</h2>
+          <div class="form-group">
+            <label>Task Title</label>
+            <input type="text" id="m-task-title" class="input-field" placeholder="e.g. Implement dynamic route handler" autofocus>
+          </div>
+          <div class="form-group">
+            <label>Priority</label>
+            <select id="m-task-priority" class="input-field">
+              <option value="medium">Medium</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Estimated Duration (Minutes)</label>
+            <input type="number" id="m-task-est" class="input-field" value="45">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitNewTask()">Create Task</button>
+          </div>
+        `;
+      } else if (type === 'habit') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 16px;">Add New Habit</h2>
+          <div class="form-group">
+            <label>Habit Name</label>
+            <input type="text" id="m-habit-title" class="input-field" placeholder="e.g. Read 20 pages">
+          </div>
+          <div class="form-group">
+            <label>Frequency</label>
+            <select id="m-habit-freq" class="input-field">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+            </select>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitNewHabit()">Save Habit</button>
+          </div>
+        `;
+      } else if (type === 'note') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 16px;">Add Note</h2>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="m-note-title" class="input-field" placeholder="Title">
+          </div>
+          <div class="form-group">
+            <label>Content</label>
+            <textarea id="m-note-content" class="input-field" rows="4"></textarea>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitNewNote()">Save Note</button>
+          </div>
+        `;
+      } else if (type === 'event') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 16px;">Add Calendar Event</h2>
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="m-event-title" class="input-field" placeholder="Meeting or Event">
+          </div>
+          <div class="form-group">
+            <label>Start Time</label>
+            <input type="text" id="m-event-start" class="input-field" placeholder="2026-09-22 14:00:00">
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitNewEvent()">Save Event</button>
+          </div>
+        `;
+      } else if (type === 'templates') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 14px;">⚡ 1-Click Productivity Templates</h2>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">Instantly seed goals, projects, milestones, habits, and tasks.</p>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="padding:14px; border:1px solid var(--card-border); border-radius:10px; cursor:pointer; background:rgba(255,255,255,0.02);" onclick="applyTemplate('software_engineer')">
+              <strong style="color:#60a5fa;">💻 Software Engineering Sprint</strong>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Distributed systems goals, LFU cache, Raft consensus tasks, 2h deep coding habits.</div>
+            </div>
+            <div style="padding:14px; border:1px solid var(--card-border); border-radius:10px; cursor:pointer; background:rgba(255,255,255,0.02);" onclick="applyTemplate('student')">
+              <strong style="color:#10b981;">🎓 Academic & Student Excellence</strong>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">OS & Networks coursework, exam cheatsheets, lecture review habits.</div>
+            </div>
+            <div style="padding:14px; border:1px solid var(--card-border); border-radius:10px; cursor:pointer; background:rgba(255,255,255,0.02);" onclick="applyTemplate('executive')">
+              <strong style="color:#f59e0b;">🔥 Peak Performance & Health</strong>
+              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Zone 2 cardio, morning deep work block, sunlight, evening digital shutdown.</div>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+          </div>
+        `;
+      } else if (type === 'evening-review') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 12px;">🌙 Daily Evening Reflection</h2>
+          <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:16px;">Review execution metrics and prime tomorrow's single highest-priority block.</p>
+          <div class="form-group">
+            <label>What was your biggest win today?</label>
+            <input type="text" id="rev-win" class="input-field" placeholder="e.g. Cleared difficult DSA problem & shipped feature">
+          </div>
+          <div class="form-group">
+            <label>What caused friction or delay?</label>
+            <input type="text" id="rev-friction" class="input-field" placeholder="e.g. Unscheduled meeting in afternoon">
+          </div>
+          <div class="form-group">
+            <label>Top #1 Priority For Tomorrow</label>
+            <input type="text" id="rev-tomorrow" class="input-field" placeholder="e.g. Raft consensus heartbeat loop">
+          </div>
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitEveningReview()">Submit Reflection</button>
+          </div>
+        `;
+      } else if (type === 'shortcuts') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 16px;">⌨ Keyboard Shortcuts</h2>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:0.86rem;">
+            <div style="display:flex; justify-content:space-between;"><span>Command Palette</span><kbd>Ctrl + K</kbd></div>
+            <div style="display:flex; justify-content:space-between;"><span>New Task</span><kbd>+ Button</kbd></div>
+            <div style="display:flex; justify-content:space-between;"><span>Start / Pause Focus Timer</span><kbd>Space</kbd></div>
+            <div style="display:flex; justify-content:space-between;"><span>Close Active Modal</span><kbd>Esc</kbd></div>
+          </div>
+          <div style="display:flex; justify-content:flex-end; margin-top:18px;">
+            <button class="btn-secondary" onclick="closeModal()">Close</button>
+          </div>
+        `;
+      } else if (type === 'search') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 14px;">Command Palette</h2>
+          <input type="text" id="cmd-input" class="input-field" placeholder="Search tasks, projects, goals, habits, notes... (Type to filter)" autofocus oninput="handleCmdSearch(this.value)">
+          <div id="cmd-results" style="margin-top: 14px; max-height:280px; overflow-y:auto; display: flex; flex-direction: column; gap: 4px;">
+            <div class="cmd-item" onclick="closeModal(); showView('home');"><span>🏠 Go to Home Dashboard</span><kbd>View</kbd></div>
+            <div class="cmd-item" onclick="closeModal(); showView('my-day');"><span>⚡ Open My Day Planner</span><kbd>View</kbd></div>
+            <div class="cmd-item" onclick="closeModal(); showView('focus');"><span>⏱ Start Deep Work Timer</span><kbd>Focus</kbd></div>
+            <div class="cmd-item" onclick="closeModal(); openModal('templates');"><span>⚡ Open 1-Click Templates</span><kbd>Tool</kbd></div>
+            <div class="cmd-item" onclick="closeModal(); showView('whiteboard');"><span>🎨 Visual Mind Map Canvas</span><kbd>Canvas</kbd></div>
+          </div>
+        `;
+      }
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('global-modal').classList.remove('open');
+    }
+
+    async function handleCmdSearch(q) {
+      if (!q.trim()) return;
+      const res = await apiFetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const data = await res.json();
+      const container = document.getElementById('cmd-results');
+      if (data.results.length === 0) {
+        container.innerHTML = `<div style="color:var(--text-muted); font-size:0.84rem; padding:8px;">No matches found for "${q}"</div>`;
+        return;
+      }
+      container.innerHTML = data.results.map(r => `
+        <div class="cmd-item" onclick="closeModal(); jumpToItem('${r.type}', ${r.id})">
+          <span>${r.type === 'task' ? '📋' : r.type === 'project' ? '📁' : r.type === 'goal' ? '🎯' : r.type === 'habit' ? '🔁' : '📝'} ${r.title}</span>
+          <span style="font-size:0.75rem; text-transform:uppercase; color:#64748b;">${r.type}</span>
+        </div>
+      `).join('');
+    }
+
+    function jumpToItem(type, id) {
+      if (type === 'task') showView('tasks');
+      else if (type === 'project' || type === 'goal') showView('goals');
+      else if (type === 'habit') showView('habits');
+      else if (type === 'note') showView('notes');
+    }
+
+    async function submitNewTask() {
+      const title = document.getElementById('m-task-title').value.trim();
+      if (!title) return;
+      const priority = document.getElementById('m-task-priority').value;
+      const est = parseInt(document.getElementById('m-task-est').value, 10) || 30;
+
+      await apiFetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, priority, estimated_duration: est })
+      });
+      closeModal();
+      loadViewData(currentView);
+    }
+
+    async function submitNewHabit() {
+      const title = document.getElementById('m-habit-title').value.trim();
+      if (!title) return;
+      const freq = document.getElementById('m-habit-freq').value;
+      await apiFetch('/api/habits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, frequency: freq })
+      });
+      closeModal();
+      loadViewData(currentView);
+    }
+
+    async function submitNewNote() {
+      const title = document.getElementById('m-note-title').value.trim();
+      const content = document.getElementById('m-note-content').value.trim();
+      if (!title) return;
+      await apiFetch('/api/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, content })
+      });
+      closeModal();
+      loadViewData(currentView);
+    }
+
+    async function submitNewEvent() {
+      const title = document.getElementById('m-event-title').value.trim();
+      const start = document.getElementById('m-event-start').value.trim();
+      if (!title || !start) return;
+      await apiFetch('/api/calendar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, start_time: start })
+      });
+      closeModal();
+      loadCalendarGrid();
+    }
+
+    async function submitEveningReview() {
+      const win = document.getElementById('rev-win').value;
+      const friction = document.getElementById('rev-friction').value;
+      const tomorrow_priority = document.getElementById('rev-tomorrow').value;
+      closeModal();
+      const res = await apiFetch('/api/daily-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ win, friction, tomorrow_priority })
+      });
+      const data = await res.json();
+      alert(`⭐ ${data.aiFeedback}`);
+      loadViewData(currentView);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        openModal('search');
+      } else if (e.key === '?' && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+        openModal('shortcuts');
+      } else if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+
+    async function checkAuth() {
+      if (!authToken) {
+        document.getElementById('auth-modal').style.display = 'flex';
+        return;
+      }
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          currentUser = data.user;
+          document.getElementById('current-user-name').textContent = currentUser.username;
+          document.getElementById('auth-modal').style.display = 'none';
+          loadViewData(currentView);
+          loadGamification();
+        } else {
+          document.getElementById('auth-modal').style.display = 'flex';
+        }
+      } catch {
+        document.getElementById('auth-modal').style.display = 'flex';
+      }
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>

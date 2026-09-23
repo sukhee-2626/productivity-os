@@ -1,0 +1,4 @@
+node_modules/
+productivity.db-journal
+.DS_Store
+*.log

@@ -1,0 +1,15 @@
+{
+  "name": "productivity-os",
+  "version": "1.0.0",
+  "description": "ProductivityOS — All-in-One Life & Work Operating System with SQLite",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test-server.js",
+    "clear": "node clear-db.js",
+    "cli": "node productivity-cli.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1"
+  }
+}

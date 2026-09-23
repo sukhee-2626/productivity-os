@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e" />
+      <stop offset="50%" stop-color="#0c1017" />
+      <stop offset="100%" stop-color="#05070a" />
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa" />
+      <stop offset="100%" stop-color="#c084fc" />
+    </linearGradient>
+    <linearGradient id="primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <linearGradient id="radial" cx="50%" cy="0%" r="60%">
+      <stop offset="0%" stop-color="rgba(59, 130, 246, 0.22)" />
+      <stop offset="100%" stop-color="transparent" />
+    </linearGradient>
+    <filter id="card-shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bg)" />
+  <rect width="1200" height="400" fill="url(#radial)" />
+
+  <!-- Topbar -->
+  <rect x="0" y="0" width="1200" height="54" fill="rgba(10, 14, 22, 0.75)" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+  <text x="24" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="16" font-weight="bold" fill="url(#brand)">⚡ ProductivityOS</text>
+
+  <!-- Search pill -->
+  <rect x="250" y="12" width="220" height="30" rx="15" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" />
+  <text x="270" y="32" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">🔍 Command Palette...  Ctrl K</text>
+
+  <!-- Topbar Badges -->
+  <rect x="740" y="14" width="105" height="26" rx="13" fill="#131a27" stroke="rgba(255,255,255,0.08)" />
+  <text x="752" y="31" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" fill="#fff">🌐 Workspaces</text>
+
+  <rect x="855" y="14" width="95" height="26" rx="13" fill="rgba(192, 132, 252, 0.1)" stroke="rgba(192, 132, 252, 0.3)" />
+  <text x="867" y="31" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" font-weight="bold" fill="#c084fc">👑 Lvl 4 • 650 XP</text>
+
+  <rect x="960" y="14" width="85" height="26" rx="13" fill="rgba(249, 115, 22, 0.1)" stroke="rgba(249, 115, 22, 0.3)" />
+  <text x="972" y="31" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" font-weight="bold" fill="#f97316">🔥 12 Streak</text>
+
+  <rect x="1055" y="14" width="65" height="26" rx="13" fill="rgba(16, 185, 129, 0.1)" stroke="rgba(16, 185, 129, 0.3)" />
+  <text x="1067" y="31" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" font-weight="bold" fill="#10b981">⚡ 94/100</text>
+
+  <rect x="1130" y="12" width="55" height="30" rx="6" fill="url(#primary)" />
+  <text x="1144" y="31" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" font-weight="bold" fill="#fff">+ New</text>
+
+  <!-- Sidebar -->
+  <rect x="0" y="54" width="210" height="646" fill="rgba(10, 14, 22, 0.95)" stroke="rgba(255,255,255,0.08)" stroke-width="1" />
+  
+  <text x="20" y="85" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#64748b" letter-spacing="1">CORE EXECUTION</text>
+  
+  <rect x="12" y="98" width="186" height="32" rx="6" fill="rgba(59, 130, 246, 0.15)" stroke="rgba(59, 130, 246, 0.3)" />
+  <text x="28" y="119" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" font-weight="bold" fill="#60a5fa">🏠  Home</text>
+  
+  <text x="28" y="152" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">⚡  My Day</text>
+  <text x="28" y="184" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">📊  Kanban</text>
+  <text x="28" y="216" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">📋  All Tasks</text>
+  <text x="28" y="248" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">📅  Time-Block Grid</text>
+  
+  <text x="20" y="284" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#64748b" letter-spacing="1">ARCHITECTURE</text>
+  <text x="28" y="310" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">🎯  Goals &amp; Projects</text>
+  <text x="28" y="342" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">🔁  Habits &amp; Matrix</text>
+  <text x="28" y="374" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">⏱  Deep Work &amp; Audio</text>
+  <text x="28" y="406" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">📈  Analytics &amp; XP</text>
+  <text x="28" y="438" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">🎨  Whiteboard Canvas</text>
+
+  <text x="20" y="474" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#64748b" letter-spacing="1">KNOWLEDGE &amp; AI</text>
+  <text x="28" y="500" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">📝  Second Brain</text>
+  <text x="28" y="532" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">📓  Journal &amp; Reviews</text>
+  <text x="28" y="564" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">🧠  Brain Dump</text>
+  <text x="28" y="596" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">🤖  AI Assistant</text>
+
+  <!-- Main Content Dashboard -->
+  <g transform="translate(230, 70)">
+    <!-- Header Greeting -->
+    <text x="0" y="32" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="22" font-weight="800" fill="#f8fafc">Good Morning, Sukhee 👋</text>
+    <text x="0" y="52" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" fill="#94a3b8">Unified productivity operating system connected with SQLite</text>
+
+    <!-- Top 4 Metric Cards -->
+    <g transform="translate(0, 68)">
+      <!-- Card 1 -->
+      <rect x="0" y="0" width="225" height="85" rx="10" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+      <text x="16" y="24" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#94a3b8" letter-spacing="0.5">TODAY'S EXECUTION</text>
+      <text x="16" y="54" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="20" font-weight="800" fill="#f8fafc">7 / 8 tasks</text>
+      <rect x="16" y="66" width="193" height="6" rx="3" fill="rgba(255,255,255,0.08)" />
+      <rect x="16" y="66" width="168" height="6" rx="3" fill="url(#primary)" />
+
+      <!-- Card 2 -->
+      <rect x="245" y="0" width="225" height="85" rx="10" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+      <text x="261" y="24" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#94a3b8" letter-spacing="0.5">DEEP WORK FOCUS</text>
+      <text x="261" y="54" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="20" font-weight="800" fill="#60a5fa">3h 45m</text>
+      <text x="261" y="72" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" fill="#64748b">Target: 3h high-energy block</text>
+
+      <!-- Card 3 -->
+      <rect x="490" y="0" width="225" height="85" rx="10" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+      <text x="506" y="24" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#94a3b8" letter-spacing="0.5">HABIT MOMENTUM</text>
+      <text x="506" y="54" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="20" font-weight="800" fill="#10b981">4 / 4 logged</text>
+      <rect x="506" y="66" width="193" height="6" rx="3" fill="rgba(255,255,255,0.08)" />
+      <rect x="506" y="66" width="193" height="6" rx="3" fill="#10b981" />
+
+      <!-- Card 4 -->
+      <rect x="735" y="0" width="215" height="85" rx="10" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+      <text x="751" y="24" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#94a3b8" letter-spacing="0.5">PRODUCTIVITY SCORE</text>
+      <text x="751" y="54" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="20" font-weight="800" fill="#c084fc">94 / 100</text>
+      <text x="751" y="72" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" fill="#64748b">Level 4 Master Builder</text>
+    </g>
+
+    <!-- Lower Section: Left Tasks, Right Focus & Heatmap -->
+    <g transform="translate(0, 172)">
+      <!-- Left Panel: Task Queue -->
+      <rect x="0" y="0" width="470" height="420" rx="12" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+      <text x="20" y="30" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" font-weight="bold" fill="#94a3b8" letter-spacing="0.5">🎯 TODAY'S PRIORITY QUEUE</text>
+
+      <!-- Task Item 1 -->
+      <g transform="translate(20, 48)">
+        <rect width="430" height="52" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" />
+        <rect x="14" y="17" width="18" height="18" rx="5" fill="#10b981" />
+        <text x="18" y="31" font-size="12" fill="#fff">✓</text>
+        <text x="44" y="27" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="13" font-weight="600" fill="#94a3b8" text-decoration="line-through">Design LFU Cache with O(1) eviction</text>
+        <text x="44" y="42" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" fill="#64748b">@DSA Mastery • ⏱ 60m • Urgent</text>
+      </g>
+
+      <!-- Task Item 2 -->
+      <g transform="translate(20, 110)">
+        <rect width="430" height="52" rx="8" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.3)" />
+        <rect x="14" y="17" width="18" height="18" rx="5" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+        <circle cx="44" cy="24" r="4" fill="#ef4444" />
+        <text x="56" y="28" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="13" font-weight="600" fill="#fff">Raft Consensus: Leader heartbeat loop</text>
+        <text x="56" y="42" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" fill="#60a5fa">@Distributed Systems • ⏱ 90m • High</text>
+      </g>
+
+      <!-- Task Item 3 -->
+      <g transform="translate(20, 172)">
+        <rect width="430" height="52" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" />
+        <rect x="14" y="17" width="18" height="18" rx="5" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+        <circle cx="44" cy="24" r="4" fill="#f59e0b" />
+        <text x="56" y="28" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="13" font-weight="600" fill="#fff">Profile SQLite WAL checkpoint latency</text>
+        <text x="56" y="42" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" fill="#64748b">@High-Throughput DB • ⏱ 45m • High</text>
+      </g>
+
+      <!-- Task Item 4 -->
+      <g transform="translate(20, 234)">
+        <rect width="430" height="52" rx="8" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" />
+        <rect x="14" y="17" width="18" height="18" rx="5" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" />
+        <circle cx="44" cy="24" r="4" fill="#3b82f6" />
+        <text x="56" y="28" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="13" font-weight="600" fill="#fff">Google Spanner TrueTime Research Paper</text>
+        <text x="56" y="42" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" fill="#64748b">@Reading • ⏱ 40m • Medium</text>
+      </g>
+
+      <!-- Right Panel: Focus Mode & Habit Matrix -->
+      <g transform="translate(490, 0)">
+        <!-- Focus Hero Box -->
+        <rect x="0" y="0" width="460" height="230" rx="12" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+        <text x="20" y="28" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#60a5fa" letter-spacing="1">DISTRACTION-FREE DEEP WORK</text>
+        
+        <text x="145" y="105" font-family="monospace" font-size="62" font-weight="900" fill="#f8fafc">24:37</text>
+        <text x="110" y="135" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="13" font-weight="600" fill="#94a3b8">Active: Raft Consensus: Leader heartbeat</text>
+
+        <!-- Soundscape tags -->
+        <g transform="translate(45, 155)">
+          <rect x="0" y="0" width="80" height="26" rx="6" fill="rgba(59,130,246,0.18)" stroke="#3b82f6" />
+          <text x="12" y="17" font-size="11" fill="#60a5fa">🌧 Rain (ON)</text>
+
+          <rect x="90" y="0" width="75" height="26" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" />
+          <text x="102" y="17" font-size="11" fill="#94a3b8">🌊 Ocean</text>
+
+          <rect x="175" y="0" width="75" height="26" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" />
+          <text x="187" y="17" font-size="11" fill="#94a3b8">🧠 40Hz</text>
+
+          <rect x="260" y="0" width="75" height="26" rx="6" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.08)" />
+          <text x="272" y="17" font-size="11" fill="#94a3b8">✨ Drone</text>
+        </g>
+
+        <!-- 35-Day Consistency Heatmap Box -->
+        <g transform="translate(0, 245)">
+          <rect x="0" y="0" width="460" height="175" rx="12" fill="rgba(15, 21, 32, 0.75)" stroke="rgba(255,255,255,0.08)" filter="url(#card-shadow)" />
+          <text x="20" y="26" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="10" font-weight="bold" fill="#94a3b8" letter-spacing="0.5">35-DAY HABIT CONSISTENCY HEATMAP</text>
+
+          <!-- Heatmap grid (7 cols x 5 rows) -->
+          <g transform="translate(20, 42)">
+            <!-- Column 1 -->
+            <rect x="0" y="0" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="0" y="20" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="0" y="40" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="0" y="60" width="16" height="16" rx="3" fill="rgba(16,185,129,0.5)" />
+            <rect x="0" y="80" width="16" height="16" rx="3" fill="#10b981" />
+
+            <!-- Column 2 -->
+            <rect x="22" y="0" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="22" y="20" width="16" height="16" rx="3" fill="rgba(16,185,129,0.75)" />
+            <rect x="22" y="40" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="22" y="60" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="22" y="80" width="16" height="16" rx="3" fill="rgba(16,185,129,0.5)" />
+
+            <!-- Column 3 -->
+            <rect x="44" y="0" width="16" height="16" rx="3" fill="rgba(16,185,129,0.75)" />
+            <rect x="44" y="20" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="44" y="40" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="44" y="60" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="44" y="80" width="16" height="16" rx="3" fill="#10b981" />
+
+            <!-- Column 4 -->
+            <rect x="66" y="0" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="66" y="20" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="66" y="40" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="66" y="60" width="16" height="16" rx="3" fill="rgba(16,185,129,0.75)" />
+            <rect x="66" y="80" width="16" height="16" rx="3" fill="#10b981" />
+
+            <!-- Column 5 -->
+            <rect x="88" y="0" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="88" y="20" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="88" y="40" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="88" y="60" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="88" y="80" width="16" height="16" rx="3" fill="#10b981" />
+
+            <!-- Column 6 -->
+            <rect x="110" y="0" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="110" y="20" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="110" y="40" width="16" height="16" rx="3" fill="rgba(16,185,129,0.5)" />
+            <rect x="110" y="60" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="110" y="80" width="16" height="16" rx="3" fill="#10b981" />
+
+            <!-- Column 7 -->
+            <rect x="132" y="0" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="132" y="20" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="132" y="40" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="132" y="60" width="16" height="16" rx="3" fill="#10b981" />
+            <rect x="132" y="80" width="16" height="16" rx="3" fill="#10b981" />
+
+            <text x="170" y="45" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="12" font-weight="700" fill="#10b981">🔥 12-day streak</text>
+            <text x="170" y="65" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto" font-size="11" fill="#94a3b8">Best: 28 days • 96% consistency</text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

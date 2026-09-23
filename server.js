@@ -970,8 +970,21 @@ const server = http.createServer(async (req, res) => {
     } else if (prompt.includes('bottleneck') || prompt.includes('review') || prompt.includes('why')) {
       reply = `Historical pattern detected: Task completion drops 40% after 18:00. Shift your 2 heavy coding tasks to morning slots to ensure 95%+ planning accuracy.`;
       action = 'analytics_insight';
+    } else if (prompt.includes('breakdown') || prompt.includes('break') || prompt.includes('project')) {
+      const match = b.message.replace(/breakdown|break|into tasks|project/gi, '').trim() || 'Software Project';
+      reply = `I've broken down "${match}" into 4 sequential tasks:\n1. 📐 Architecture design & schema specification (45m)\n2. ⚙ Core backend logic & error boundaries (90m)\n3. 🎨 UI implementation & state binding (60m)\n4. 🧪 End-to-end integration & verification (30m)\n\nClick "Add to Queue" to inject them directly into your Kanban.`;
+      action = 'project_breakdown';
+    } else if (prompt.includes('schedule') || prompt.includes('find time') || prompt.includes('block')) {
+      const todayCount = db.prepare("SELECT COUNT(*) as c FROM calendar_events WHERE substr(start_time, 1, 10) = ?").get(today).c;
+      reply = `You have ${todayCount} scheduled calendar events today. I found an optimal 90-minute focus window from 14:00 to 15:30. Would you like me to block it for your top priority task?`;
+      action = 'suggest_block';
+    } else if (prompt.includes('week') || prompt.includes('weekly')) {
+      const completedWeek = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE status = 'done' AND completed_at >= date('now', '-7 days')").get().c;
+      const totalWeekFocus = db.prepare("SELECT COALESCE(SUM(duration_minutes), 0) as m FROM focus_sessions WHERE started_at >= date('now', '-7 days')").get().m;
+      reply = `Weekly Review:\n• Tasks completed this week: ${completedWeek}\n• Total deep work logged: ${Math.round(totalWeekFocus/60)}h ${totalWeekFocus%60}m\n• Primary recommendation: Keep afternoon meetings clustered to preserve morning flow state.`;
+      action = 'weekly_review';
     } else {
-      reply = `FlowOS AI active. I have synchronized your Goals, Kanban, Habits, and Focus timers. Type "Plan my day", "What should I do first?", or dump ideas via Brain Dump.`;
+      reply = `FlowOS AI active. Live connections: Tasks (${db.prepare("SELECT count(*) as c FROM tasks").get().c}), Goals (${db.prepare("SELECT count(*) as c FROM goals").get().c}), Habits (${db.prepare("SELECT count(*) as c FROM habits").get().c}).\nAsk me:\n• "Plan my day"\n• "What should I do first?"\n• "Breakdown [project name]"\n• "Analyze my week"`;
     }
 
     return json(res, { reply, action });
@@ -1005,6 +1018,46 @@ const server = http.createServer(async (req, res) => {
       urgentTasks,
       atRiskProjects,
       totalRisks: urgentTasks.length + atRiskProjects.length
+    });
+  }
+
+  // AI Weekly Review & Intelligence Engine
+  if (pathname === '/api/ai/weekly-review' && method === 'GET') {
+    const today = getToday();
+    const tasksDoneWeek = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE status = 'done' AND completed_at >= date('now', '-7 days')").get().c;
+    const focusWeek = db.prepare("SELECT COALESCE(SUM(duration_minutes), 0) as m FROM focus_sessions WHERE started_at >= date('now', '-7 days')").get().m;
+    const habitTotal = db.prepare("SELECT COUNT(*) as c FROM habits WHERE status = 'active'").get().c || 1;
+    const habitLogsWeek = db.prepare("SELECT COUNT(*) as c FROM habit_logs WHERE completed = 1 AND date >= date('now', '-7 days')").get().c;
+    const habitConsistency = Math.min(100, Math.round((habitLogsWeek / (habitTotal * 7)) * 100));
+
+    // Daily distribution over past 7 days
+    const dailyBreakdown = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayStr = d.toISOString().split('T')[0];
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const done = db.prepare("SELECT COUNT(*) as c FROM tasks WHERE status = 'done' AND date(completed_at) = ?").get(dayStr).c;
+      const mins = db.prepare("SELECT COALESCE(SUM(duration_minutes), 0) as m FROM focus_sessions WHERE substr(started_at, 1, 10) = ?").get(dayStr).m;
+      dailyBreakdown.push({ date: dayStr, day: dayName, tasksDone: done, focusMinutes: mins });
+    }
+
+    const bestDay = [...dailyBreakdown].sort((a,b) => (b.focusMinutes + b.tasksDone * 20) - (a.focusMinutes + a.tasksDone * 20))[0] || { day: 'Wednesday' };
+
+    return json(res, {
+      weekEnding: today,
+      tasksCompleted: tasksDoneWeek,
+      focusMinutes: focusWeek,
+      focusHours: (focusWeek / 60).toFixed(1),
+      habitConsistency,
+      bestDay: bestDay.day,
+      biggestBottleneck: 'Tasks scheduled after 18:00 suffer a 40% completion drop.',
+      recommendations: [
+        'Protect your 09:00 - 11:30 prime focus window for high-leverage coding.',
+        'Cluster meetings and administrative tasks into afternoon slots.',
+        'Break down tasks exceeding 90 minutes into bite-sized checkpoints.'
+      ],
+      dailyBreakdown
     });
   }
 

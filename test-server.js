@@ -223,7 +223,19 @@ async function runTests() {
   assert.ok(tasksAfterCsv.data.some(t => t.title === 'CSV Imported Task A'), 'Imported task must appear in tasks list');
   console.log('✔ CSV template download and CSV task import into Kanban & Plan valid');
 
-  // 20. Workspace Data Wipe (New User Reset)
+  // 20. AI Weekly Review & Heuristic Engine
+  const weeklyRes = await request('GET', '/api/ai/weekly-review', null, adminToken);
+  assert.strictEqual(weeklyRes.status, 200);
+  assert.ok(weeklyRes.data.bestDay, 'Weekly review must report best execution day');
+  assert.ok(Array.isArray(weeklyRes.data.dailyBreakdown), 'Weekly review must provide 7-day distribution');
+  assert.ok(Array.isArray(weeklyRes.data.recommendations), 'Weekly review must provide actionable advice');
+
+  const aiChatBreakdown = await request('POST', '/api/ai/chat', { message: 'breakdown Distributed Cache Project' }, adminToken);
+  assert.strictEqual(aiChatBreakdown.status, 200);
+  assert.strictEqual(aiChatBreakdown.data.action, 'project_breakdown');
+  console.log('✔ AI weekly review engine and project breakdown valid');
+
+  // 21. Workspace Data Wipe (New User Reset)
   const clearRes = await request('POST', '/api/workspaces/clear', null, adminToken);
   assert.strictEqual(clearRes.status, 200, 'Workspace clear must be 200');
   const postClearOverview = await request('GET', '/api/overview', null, adminToken);
@@ -234,7 +246,7 @@ async function runTests() {
 
   server.close(() => {
     db.close();
-    console.log('All 20 integration & world-class feature checks passed. ProductivityOS verified.');
+    console.log('All 21 integration & world-class feature checks passed. ProductivityOS verified.');
     process.exit(0);
   });
 }

@@ -754,10 +754,12 @@
           <div class="ai-chat-box" id="ai-chat-history">
             <div class="ai-bubble ai-bot">Hello! I am your FlowOS Assistant. I have direct access to your local SQLite database. Ask me to plan your day, prioritize tasks, or diagnose bottlenecks.</div>
           </div>
-          <div style="display: flex; gap: 8px; margin: 12px 0;">
+          <div style="display: flex; gap: 8px; margin: 12px 0; flex-wrap: wrap;">
             <button class="btn-secondary" style="font-size:0.75rem;" onclick="sendAiPrompt('Plan my day')">⚡ Plan my day</button>
             <button class="btn-secondary" style="font-size:0.75rem;" onclick="sendAiPrompt('What should I do first?')">🎯 What should I do first?</button>
             <button class="btn-secondary" style="font-size:0.75rem;" onclick="sendAiPrompt('Analyze my bottlenecks')">📈 Analyze bottlenecks</button>
+            <button class="btn-secondary" style="font-size:0.75rem; color:#c084fc;" onclick="sendAiPrompt('Analyze my weekly review')">📅 Weekly Review</button>
+            <button class="btn-secondary" style="font-size:0.75rem; color:#60a5fa;" onclick="sendAiPrompt('Breakdown Distributed Storage Project')">🔨 Project Breakdown</button>
           </div>
           <div style="display: flex; gap: 10px;">
             <input type="text" id="ai-prompt-input" class="input-field" placeholder="Ask AI anything..." onkeydown="if(event.key==='Enter') sendAiMessage()">

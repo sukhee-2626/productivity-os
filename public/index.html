@@ -512,28 +512,61 @@
             <h1 style="font-size: 1.6rem; font-weight: 800;">📊 Kanban Pipeline</h1>
             <p style="color: var(--text-muted); font-size: 0.88rem;">Single source of truth. Drag and drop cards between lifecycle columns.</p>
           </div>
-          <button class="btn-action" onclick="openModal('task')">+ Add Card</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="openModal('csv-tasks')">📥 Import CSV</button>
+            <button class="btn-action" onclick="openModal('task')">+ Add Card</button>
+          </div>
         </div>
 
         <div class="kanban-board">
           <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'backlog')">
-            <div class="kanban-col-header"><span>Backlog</span><span id="kb-count-backlog">0</span></div>
+            <div class="kanban-col-header">
+              <span>Backlog</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="kb-count-backlog">0</span>
+                <button class="btn-secondary" style="padding:1px 6px; font-size:0.75rem;" onclick="openQuickTaskInCol('backlog')" title="Add to Backlog">+</button>
+              </div>
+            </div>
             <div class="kanban-cards" id="kb-col-backlog"></div>
           </div>
           <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'todo')">
-            <div class="kanban-col-header"><span>To Do</span><span id="kb-count-todo">0</span></div>
+            <div class="kanban-col-header">
+              <span>To Do</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="kb-count-todo">0</span>
+                <button class="btn-secondary" style="padding:1px 6px; font-size:0.75rem;" onclick="openQuickTaskInCol('todo')" title="Add to To Do">+</button>
+              </div>
+            </div>
             <div class="kanban-cards" id="kb-col-todo"></div>
           </div>
           <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'in_progress')">
-            <div class="kanban-col-header"><span>In Progress</span><span id="kb-count-in_progress">0</span></div>
+            <div class="kanban-col-header">
+              <span>In Progress</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="kb-count-in_progress">0</span>
+                <button class="btn-secondary" style="padding:1px 6px; font-size:0.75rem;" onclick="openQuickTaskInCol('in_progress')" title="Add to In Progress">+</button>
+              </div>
+            </div>
             <div class="kanban-cards" id="kb-col-in_progress"></div>
           </div>
           <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'review')">
-            <div class="kanban-col-header"><span>Review</span><span id="kb-count-review">0</span></div>
+            <div class="kanban-col-header">
+              <span>Review</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="kb-count-review">0</span>
+                <button class="btn-secondary" style="padding:1px 6px; font-size:0.75rem;" onclick="openQuickTaskInCol('review')" title="Add to Review">+</button>
+              </div>
+            </div>
             <div class="kanban-cards" id="kb-col-review"></div>
           </div>
           <div class="kanban-col" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, 'done')">
-            <div class="kanban-col-header"><span>Done</span><span id="kb-count-done">0</span></div>
+            <div class="kanban-col-header">
+              <span>Done</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span id="kb-count-done">0</span>
+                <button class="btn-secondary" style="padding:1px 6px; font-size:0.75rem;" onclick="openQuickTaskInCol('done')" title="Add to Done">+</button>
+              </div>
+            </div>
             <div class="kanban-cards" id="kb-col-done"></div>
           </div>
         </div>
@@ -544,6 +577,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <h1 style="font-size: 1.6rem; font-weight: 800;">📋 Task Inventory</h1>
           <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" onclick="openModal('csv-tasks')">📥 CSV Import</button>
             <button class="btn-secondary" style="color:#f87171;" id="btn-delete-selected" onclick="deleteSelectedTasks()" disabled>🗑 Delete Selected (<span id="selected-count">0</span>)</button>
             <button class="btn-secondary" style="color:#ef4444;" onclick="clearAllTasks()">Clear All Tasks</button>
             <button class="btn-action" onclick="openModal('task')">+ Add Task</button>
@@ -1788,6 +1822,33 @@
             <button class="btn-action" onclick="submitCreateUser()">Create User</button>
           </div>
         `;
+      } else if (type === 'csv-tasks') {
+        body.innerHTML = `
+          <h2 style="margin-bottom: 12px;">📥 CSV Task & Plan Importer</h2>
+          <p style="color:var(--text-muted); font-size:0.82rem; margin-bottom:14px;">Upload or paste CSV rows to automatically populate Tasks, Priorities, Estimates, and Kanban columns.</p>
+          
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <a href="/api/tasks/csv-template" download="productivity-tasks-template.csv" class="btn-secondary" style="text-decoration:none; font-size:0.78rem; color:#60a5fa;">📄 Download Dummy CSV Format</a>
+            <button class="btn-secondary" style="font-size:0.78rem;" onclick="loadSampleCsvInModal()">📋 Load Sample Data</button>
+          </div>
+
+          <div class="form-group">
+            <label>Upload .csv file</label>
+            <input type="file" id="csv-file-input" accept=".csv" class="input-field" onchange="handleCsvFile(this)">
+          </div>
+
+          <div class="form-group">
+            <label>Or Paste CSV text directly</label>
+            <textarea id="csv-text-input" rows="6" class="input-field" style="font-family:monospace; font-size:0.78rem;" placeholder="title,description,status,priority,estimated_duration,due_date,energy_level,labels&#10;Implement Raft Election,Consensus timers,todo,urgent,90,2026-09-25,5,&quot;DSA,Coding&quot;"></textarea>
+          </div>
+
+          <div id="csv-error" style="display:none; color:#f87171; font-size:0.8rem; margin-bottom:8px;"></div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+            <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+            <button class="btn-action" onclick="submitCsvImport()">Import Tasks</button>
+          </div>
+        `;
       } else if (type === 'user-manage') {
         body.innerHTML = `
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -1876,6 +1937,62 @@
       else if (type === 'project' || type === 'goal') showView('goals');
       else if (type === 'habit') showView('habits');
       else if (type === 'note') showView('notes');
+    }
+
+    function openQuickTaskInCol(col) {
+      const title = prompt(`Add new card to ${col.toUpperCase()}:`);
+      if (!title) return;
+      apiFetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, status: col, priority: 'medium', estimated_duration: 30 })
+      }).then(() => loadViewData(currentView));
+    }
+
+    function handleCsvFile(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById('csv-text-input').value = e.target.result;
+      };
+      reader.readAsText(file);
+    }
+
+    function loadSampleCsvInModal() {
+      const sample = [
+        'title,description,status,priority,estimated_duration,due_date,energy_level,labels',
+        'Implement Raft Consensus,Build leader heartbeat loop,in_progress,urgent,90,2026-09-25,5,"DSA,Coding"',
+        'Prepare Presentation Slides,System architecture overview,todo,high,45,2026-09-24,3,"Work,Docs"',
+        'Review Pull Requests,Audit code review bottleneck,review,medium,30,2026-09-24,2,"Review"',
+        'Healthy Meal Prep & Hydration,Cook meals and drink 3L water,backlog,low,60,2026-09-26,2,"Personal"',
+        'Team Sprint Retrospective,Record achievements in diary,done,medium,30,2026-09-22,2,"Reflection"'
+      ].join('\n');
+      document.getElementById('csv-text-input').value = sample;
+    }
+
+    async function submitCsvImport() {
+      const csv = document.getElementById('csv-text-input').value.trim();
+      const errEl = document.getElementById('csv-error');
+      if (!csv) {
+        errEl.textContent = 'Please choose a CSV file or paste CSV text.';
+        errEl.style.display = 'block';
+        return;
+      }
+      const res = await apiFetch('/api/tasks/csv-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csv, workspace_id: selectedWorkspace === 'all' ? 1 : selectedWorkspace })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Import failed.';
+        errEl.style.display = 'block';
+        return;
+      }
+      closeModal();
+      alert(`✅ Successfully imported ${data.importedCount} tasks into Kanban and Task Queue!`);
+      loadViewData(currentView);
     }
 
     async function submitCreateUser() {

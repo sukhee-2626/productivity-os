@@ -205,7 +205,25 @@ async function runTests() {
   assert.strictEqual(delBlock.status, 200);
   console.log('✔ Work schedule generator and task time-blocking valid');
 
-  // 19. Workspace Data Wipe (New User Reset)
+  // 19. CSV Template Download & Bulk CSV Import
+  const templateRes = await request('GET', '/api/tasks/csv-template');
+  assert.strictEqual(templateRes.status, 200);
+  assert.ok(typeof templateRes.data === 'string' && templateRes.data.includes('title,description,status'), 'Must return valid CSV template string');
+
+  const csvPayload = [
+    'title,description,status,priority,estimated_duration,due_date,energy_level,labels',
+    'CSV Imported Task A,High priority feature,in_progress,urgent,60,2026-09-25,5,"CSV,Test"',
+    'CSV Imported Task B,Review task,review,medium,30,2026-09-24,3,"Review"'
+  ].join('\n');
+
+  const importRes = await request('POST', '/api/tasks/csv-import', { csv: csvPayload }, adminToken);
+  assert.strictEqual(importRes.status, 200);
+  assert.strictEqual(importRes.data.importedCount, 2);
+  const tasksAfterCsv = await request('GET', '/api/tasks', null, adminToken);
+  assert.ok(tasksAfterCsv.data.some(t => t.title === 'CSV Imported Task A'), 'Imported task must appear in tasks list');
+  console.log('✔ CSV template download and CSV task import into Kanban & Plan valid');
+
+  // 20. Workspace Data Wipe (New User Reset)
   const clearRes = await request('POST', '/api/workspaces/clear', null, adminToken);
   assert.strictEqual(clearRes.status, 200, 'Workspace clear must be 200');
   const postClearOverview = await request('GET', '/api/overview', null, adminToken);
@@ -216,7 +234,7 @@ async function runTests() {
 
   server.close(() => {
     db.close();
-    console.log('All 19 integration & world-class feature checks passed. ProductivityOS verified.');
+    console.log('All 20 integration & world-class feature checks passed. ProductivityOS verified.');
     process.exit(0);
   });
 }

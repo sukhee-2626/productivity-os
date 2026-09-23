@@ -369,6 +369,103 @@ const server = http.createServer(async (req, res) => {
     return json(res, { tasks, events, date: today });
   }
 
+  // CSV Sample Template Download
+  if (pathname === '/api/tasks/csv-template' && method === 'GET') {
+    const csvHeader = 'title,description,status,priority,estimated_duration,due_date,energy_level,labels\n';
+    const sampleRows = [
+      'Complete Distributed Systems Lab,Implement Raft consensus election,todo,urgent,90,2026-09-25,5,"DSA,Coding"',
+      'Design REST API Documentation,OpenAPI 3.0 specification for v1,in_progress,high,45,2026-09-24,3,"Docs,API"',
+      'Review Pull Requests,Audit security and latency metrics,review,medium,30,2026-09-24,3,"CodeReview"',
+      'Grocery & Healthy Meal Prep,High protein weekly prep,backlog,low,60,2026-09-27,2,"Personal,Health"',
+      'Sprint Retrospective Notes,Document team wins and blockers,done,medium,30,2026-09-22,2,"Planning"'
+    ].join('\n');
+
+    res.writeHead(200, {
+      'Content-Type': 'text/csv',
+      'Content-Disposition': 'attachment; filename="productivity-tasks-template.csv"',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(csvHeader + sampleRows);
+  }
+
+  // CSV Import Tasks & Plan
+  if (pathname === '/api/tasks/csv-import' && method === 'POST') {
+    const b = await parseBody(req);
+    const csvContent = b.csv || '';
+    if (!csvContent.trim()) {
+      return json(res, { error: 'CSV content required' }, 400);
+    }
+
+    const lines = csvContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    if (lines.length < 2) {
+      return json(res, { error: 'CSV must contain a header and at least one data row' }, 400);
+    }
+
+    // Parse CSV line handling quoted strings
+    function parseCsvLine(line) {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    }
+
+    const headers = parseCsvLine(lines[0]).map(h => h.toLowerCase());
+    const validStatuses = ['backlog', 'todo', 'in_progress', 'review', 'done'];
+    const validPriorities = ['urgent', 'high', 'medium', 'low'];
+    const createdTasks = [];
+    const today = getToday();
+
+    const insertStmt = db.prepare(`
+      INSERT INTO tasks (title, description, status, priority, estimated_duration, due_date, energy_level, labels_json, workspace_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    const importTransaction = db.transaction(() => {
+      for (let i = 1; i < lines.length; i++) {
+        const row = parseCsvLine(lines[i]);
+        if (row.length === 0 || !row[0]) continue;
+
+        const record = {};
+        headers.forEach((h, idx) => {
+          record[h] = row[idx] || '';
+        });
+
+        const title = record.title || row[0];
+        if (!title) continue;
+
+        const desc = record.description || '';
+        let st = (record.status || 'todo').toLowerCase();
+        if (!validStatuses.includes(st)) st = 'todo';
+
+        let prio = (record.priority || 'medium').toLowerCase();
+        if (!validPriorities.includes(prio)) prio = 'medium';
+
+        const est = parseInt(record.estimated_duration, 10) || 30;
+        const due = record.due_date || today;
+        const energy = Math.min(5, Math.max(1, parseInt(record.energy_level, 10) || 3));
+        const labels = record.labels ? record.labels.split(',').map(s => s.trim()).filter(Boolean) : ['CSV'];
+
+        const info = insertStmt.run(title, desc, st, prio, est, due, energy, JSON.stringify(labels), b.workspace_id || 1);
+        createdTasks.push({ id: info.lastInsertRowid, title, status: st, priority: prio, due_date: due });
+      }
+    });
+
+    importTransaction();
+    return json(res, { success: true, importedCount: createdTasks.length, tasks: createdTasks });
+  }
+
   // Tasks CRUD
   if (pathname === '/api/tasks' && method === 'GET') {
     const status = parsedUrl.searchParams.get('status');

@@ -455,7 +455,10 @@
           <div class="card">
             <div class="card-title">
               <span>🎯 Today's Task Queue</span>
-              <span style="font-size: 0.75rem; color: var(--primary); cursor: pointer;" onclick="showView('tasks')">View All →</span>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <span style="font-size: 0.72rem; color: #ef4444; cursor: pointer;" onclick="clearAllTasks()">Clear Tasks</span>
+                <span style="font-size: 0.72rem; color: var(--primary); cursor: pointer;" onclick="showView('tasks')">View All →</span>
+              </div>
             </div>
             <div id="home-task-list">Loading queue...</div>
           </div>
@@ -535,11 +538,22 @@
 
       <!-- 4. ALL TASKS -->
       <div id="view-tasks" class="view-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
           <h1 style="font-size: 1.6rem; font-weight: 800;">📋 Task Inventory</h1>
-          <button class="btn-action" onclick="openModal('task')">+ Add Task</button>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" style="color:#f87171;" id="btn-delete-selected" onclick="deleteSelectedTasks()" disabled>🗑 Delete Selected (<span id="selected-count">0</span>)</button>
+            <button class="btn-secondary" style="color:#ef4444;" onclick="clearAllTasks()">Clear All Tasks</button>
+            <button class="btn-action" onclick="openModal('task')">+ Add Task</button>
+          </div>
         </div>
         <div class="card">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; margin-bottom:12px; border-bottom:1px solid var(--card-border); font-size:0.8rem; color:var(--text-muted);">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="select-all-tasks" onchange="toggleSelectAll(this.checked)" style="accent-color:var(--primary); cursor:pointer;">
+              <span>Select All</span>
+            </label>
+            <span id="inventory-count"></span>
+          </div>
           <div id="all-tasks-list">Loading...</div>
         </div>
       </div>
@@ -970,7 +984,8 @@
     function renderTaskHtml(t) {
       const isDone = t.status === 'done';
       return `
-        <div class="task-item">
+        <div class="task-item" id="task-item-${t.id}">
+          <input type="checkbox" class="task-select-chk" value="${t.id}" onchange="updateSelectedTasks()" onclick="event.stopPropagation()" style="cursor:pointer; width:15px; height:15px; accent-color:var(--primary); margin-right:4px;">
           <div class="task-checkbox ${isDone ? 'checked' : ''}" onclick="toggleTaskStatus(${t.id}, '${t.status}')">
             ${isDone ? '✓' : ''}
           </div>
@@ -986,8 +1001,50 @@
               <span style="text-transform: capitalize;">${t.priority}</span>
             </div>
           </div>
+          <button class="btn-secondary" style="padding:3px 8px; font-size:0.75rem; color:#f87171; border-color:rgba(239,68,68,0.25);" onclick="event.stopPropagation(); deleteSingleTask(${t.id})" title="Delete task">🗑</button>
         </div>
       `;
+    }
+
+    async function deleteSingleTask(id) {
+      if (!confirm('Delete this task?')) return;
+      await apiFetch(`/api/tasks/${id}`, { method: 'DELETE' });
+      loadViewData(currentView);
+    }
+
+    function updateSelectedTasks() {
+      const selected = Array.from(document.querySelectorAll('.task-select-chk:checked')).map(el => el.value);
+      const countEl = document.getElementById('selected-count');
+      const btn = document.getElementById('btn-delete-selected');
+      if (countEl) countEl.textContent = selected.length;
+      if (btn) btn.disabled = selected.length === 0;
+    }
+
+    function toggleSelectAll(checked) {
+      document.querySelectorAll('.task-select-chk').forEach(chk => {
+        chk.checked = checked;
+      });
+      updateSelectedTasks();
+    }
+
+    async function deleteSelectedTasks() {
+      const selected = Array.from(document.querySelectorAll('.task-select-chk:checked')).map(el => el.value);
+      if (selected.length === 0) return;
+      if (!confirm(`Delete ${selected.length} selected task(s)?`)) return;
+      await apiFetch('/api/tasks/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selected })
+      });
+      const allChk = document.getElementById('select-all-tasks');
+      if (allChk) allChk.checked = false;
+      loadViewData(currentView);
+    }
+
+    async function clearAllTasks() {
+      if (!confirm('Delete ALL tasks in this workspace?')) return;
+      await apiFetch(`/api/tasks/clear-all?workspace_id=${selectedWorkspace}`, { method: 'POST' });
+      loadViewData(currentView);
     }
 
     async function toggleTaskStatus(id, currentStatus) {
@@ -1046,7 +1103,10 @@
           <div class="kanban-card" draggable="true" ondragstart="handleDragStart(event, ${t.id})">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span class="priority-dot p-${t.priority}"></span>
-              <span style="font-size: 0.72rem; color: var(--text-muted);">${t.project_title ? '@' + t.project_title : ''}</span>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span style="font-size: 0.72rem; color: var(--text-muted);">${t.project_title ? '@' + t.project_title : ''}</span>
+                <span style="cursor:pointer; color:#f87171; font-size:0.75rem; padding:1px 5px; border-radius:3px; background:rgba(239,68,68,0.1);" onclick="event.stopPropagation(); deleteSingleTask(${t.id})" title="Delete task">✕</span>
+              </div>
             </div>
             <div style="font-size: 0.85rem; font-weight: 600;">${t.title}</div>
             <div style="font-size: 0.72rem; color: #64748b; margin-top: 6px;">Est: ${t.estimated_duration || 30}m</div>
@@ -1075,7 +1135,10 @@
     async function loadAllTasks() {
       const res = await apiFetch(`/api/tasks?workspace_id=${selectedWorkspace}`);
       const tasks = await res.json();
-      document.getElementById('all-tasks-list').innerHTML = tasks.length ? tasks.map(t => renderTaskHtml(t)).join('') : '<div style="color:var(--text-muted)">No tasks found.</div>';
+      const countEl = document.getElementById('inventory-count');
+      if (countEl) countEl.textContent = `${tasks.length} total tasks`;
+      document.getElementById('all-tasks-list').innerHTML = tasks.length ? tasks.map(t => renderTaskHtml(t)).join('') : '<div style="color:var(--text-muted); padding:10px 0;">No tasks found.</div>';
+      updateSelectedTasks();
     }
 
     // 5. Time-Block Grid Calendar

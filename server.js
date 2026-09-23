@@ -399,10 +399,30 @@ const server = http.createServer(async (req, res) => {
     return json(res, updated);
   }
 
+  if (pathname === '/api/tasks/bulk-delete' && method === 'POST') {
+    const b = await parseBody(req);
+    const ids = Array.isArray(b.ids) ? b.ids.map(Number).filter(n => !isNaN(n)) : [];
+    if (ids.length > 0) {
+      const placeholders = ids.map(() => '?').join(',');
+      db.prepare(`DELETE FROM tasks WHERE id IN (${placeholders})`).run(...ids);
+    }
+    return json(res, { success: true, deletedCount: ids.length });
+  }
+
+  if (pathname === '/api/tasks/clear-all' && method === 'POST') {
+    const ws = parsedUrl.searchParams.get('workspace_id');
+    if (ws && ws !== 'all') {
+      db.prepare('DELETE FROM tasks WHERE workspace_id = ?').run(ws);
+    } else {
+      db.prepare('DELETE FROM tasks').run();
+    }
+    return json(res, { success: true, message: 'All tasks cleared.' });
+  }
+
   if (pathname.startsWith('/api/tasks/') && method === 'DELETE') {
     const id = parseInt(pathname.split('/')[3], 10);
     db.prepare('DELETE FROM tasks WHERE id = ?').run(id);
-    return json(res, { success: true });
+    return json(res, { success: true, deletedId: id });
   }
 
   // Kanban View

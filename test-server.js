@@ -167,7 +167,29 @@ async function runTests() {
   assert.strictEqual(unauthRes.status, 401, 'Revoked session must be 401');
   console.log('✔ Logout session invalidation valid');
 
-  // 17. Workspace Data Wipe (New User Reset)
+  // 17. Task Bulk Deletion & Removal Engine
+  const t1 = await request('POST', '/api/tasks', { title: 'Batch Task 1' }, adminToken);
+  const t2 = await request('POST', '/api/tasks', { title: 'Batch Task 2' }, adminToken);
+  const t3 = await request('POST', '/api/tasks', { title: 'Batch Task 3' }, adminToken);
+
+  // Single delete
+  const delSingle = await request('DELETE', `/api/tasks/${t1.data.id}`, null, adminToken);
+  assert.strictEqual(delSingle.status, 200);
+
+  // Bulk delete selected
+  const delBulk = await request('POST', '/api/tasks/bulk-delete', { ids: [t2.data.id, t3.data.id] }, adminToken);
+  assert.strictEqual(delBulk.status, 200);
+  assert.strictEqual(delBulk.data.deletedCount, 2);
+
+  // Clear all tasks
+  await request('POST', '/api/tasks', { title: 'Task to clear' }, adminToken);
+  const clearTasks = await request('POST', '/api/tasks/clear-all', null, adminToken);
+  assert.strictEqual(clearTasks.status, 200);
+  const tasksAfterClear = await request('GET', '/api/tasks', null, adminToken);
+  assert.strictEqual(tasksAfterClear.data.length, 0);
+  console.log('✔ Single delete, bulk delete, and clear-all tasks valid');
+
+  // 18. Workspace Data Wipe (New User Reset)
   const clearRes = await request('POST', '/api/workspaces/clear', null, adminToken);
   assert.strictEqual(clearRes.status, 200, 'Workspace clear must be 200');
   const postClearOverview = await request('GET', '/api/overview', null, adminToken);
@@ -178,7 +200,7 @@ async function runTests() {
 
   server.close(() => {
     db.close();
-    console.log('All 17 integration & world-class feature checks passed. ProductivityOS verified.');
+    console.log('All 18 integration & world-class feature checks passed. ProductivityOS verified.');
     process.exit(0);
   });
 }

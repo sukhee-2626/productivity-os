@@ -162,6 +162,9 @@ Default admin credentials:
 | `GET` | `/api/tasks` | List tasks (supports `?workspace_id=` and `?status=`) |
 | `POST` | `/api/tasks` | Create task with priority, energy, and estimates |
 | `PUT` | `/api/tasks/:id` | Update task & trigger cascade progress updates |
+| `DELETE` | `/api/tasks/:id` | Delete single task (one-by-one) |
+| `POST` | `/api/tasks/bulk-delete` | Delete selected tasks by ID array (`{ ids: [1, 2] }`) |
+| `POST` | `/api/tasks/clear-all` | Delete all tasks in workspace or global |
 | `GET` | `/api/kanban` | Fetch Kanban columns (Backlog, Todo, In Progress, Review, Done) |
 | `GET` | `/api/habits/heatmap` | 35-day activity matrix for consistency visualization |
 | `GET` | `/api/gamification` | Real-time XP, level progress, and badges |
